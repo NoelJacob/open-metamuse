@@ -1,0 +1,98 @@
+{
+  "t1": [
+    {
+      "id": "m1",
+      "role": "user",
+      "text": "Hey Muse, plan my weekend in Paris",
+      "ts": "2026-09-08T08:20:00Z",
+      "cards": []
+    },
+    {
+      "id": "m2",
+      "role": "agent",
+      "text": "Here is a 2-day plan.",
+      "ts": "2026-09-08T08:21:00Z",
+      "cards": [],
+      "reply_to": "Hey Muse, plan my weekend in Paris"
+    },
+    {
+      "id": "m3",
+      "role": "agent",
+      "text": "Day 1: Louvre in the morning, Seine cruise at sunset.",
+      "ts": "2026-09-08T08:21:10Z",
+      "cards": [],
+      "reply_to": "Hey Muse, plan my weekend in Paris"
+    },
+    {
+      "id": "m4",
+      "role": "agent",
+      "text": "Day 2: Montmartre and the Marais.",
+      "ts": "2026-09-08T08:21:20Z",
+      "cards": [],
+      "reply_to": "Hey Muse, plan my weekend in Paris"
+    },
+    {
+      "id": "m5",
+      "role": "user",
+      "text": "Thanks! That looks great.",
+      "ts": "2026-09-08T08:22:00Z",
+      "cards": []
+    },
+    {
+      "id": "m6",
+      "role": "agent",
+      "text": "Here is the demo picture.",
+      "ts": "2026-09-08T08:23:00Z",
+      "cards": [
+        {
+          "kind": "image",
+          "url": "/api/demo-image",
+          "title": "demo.jpg"
+        }
+      ],
+      "reply_to": "Thanks! That looks great."
+    },
+    {
+      "id": "m7",
+      "role": "agent",
+      "text": "Glad you like it! Anything else I can plan for you?",
+      "ts": "2026-09-08T08:24:00Z",
+      "cards": [],
+      "reply_to": "Thanks! That looks great."
+    }
+  ],
+  "t2": [
+    {
+      "cards": [],
+      "id": "m3",
+      "role": "user",
+      "text": "Any trip ideas?",
+      "ts": "2026-09-08T09:28:00Z"
+    },
+    {
+      "cards": [],
+      "id": "m4",
+      "role": "agent",
+      "text": "How about a coastal road trip?",
+      "ts": "2026-09-08T09:29:00Z",
+      "reply_to": "Any trip ideas?"
+    }
+  ],
+  "t3": [
+    {
+      "cards": [],
+      "id": "m5",
+      "role": "user",
+      "text": "Give me a pasta recipe",
+      "ts": "2026-09-07T18:14:00Z"
+    },
+    {
+      "cards": [],
+      "id": "m6",
+      "role": "agent",
+      "text": "Try garlic butter pasta with parmesan.",
+      "ts": "2026-09-07T18:15:00Z",
+      "reply_to": "Give me a pasta recipe"
+    }
+  ]
+}
