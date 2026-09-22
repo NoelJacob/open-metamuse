@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'api.dart';
 
 // ponytail: one ChangeNotifier holds gate + lists; no providers/get_it.
-enum SessionStage { loggedOut, onboarding, activation, pin, main }
+enum SessionStage { loggedOut, onboarding, activation, main }
 
 class AppState extends ChangeNotifier {
   final ApiClient api;
@@ -23,20 +23,22 @@ class AppState extends ChangeNotifier {
   String? currentThreadId;
   final Map<String, List<Map<String, dynamic>>> messages = {};
   List<Map<String, dynamic>> feedUnits = [];
+  List<String> goals = [];
+
+  void setTheme(ThemeMode mode) {
+    themeMode = mode;
+    notifyListeners();
+  }
+
+  void addGoal(String title) {
+    final t = title.trim();
+    if (t.isEmpty) return;
+    goals.add(t);
+    notifyListeners();
+  }
   List<Map<String, dynamic>> connectorList = [];
   bool tosAccepted = false;
   bool gatewayError = false;
-  String searchQuery = '';
-
-  List<Map<String, dynamic>> get visibleThreads {
-    if (searchQuery.isEmpty) return threads;
-    final q = searchQuery.toLowerCase();
-    return threads
-        .where((t) =>
-            (t['title'] ?? '').toString().toLowerCase().contains(q))
-        .toList();
-  }
-
   List<Map<String, dynamic>> get currentMessages =>
       currentThreadId == null ? [] : (messages[currentThreadId] ?? []);
 
@@ -66,16 +68,6 @@ class AppState extends ChangeNotifier {
   }
 
   void beginOnboarding() => setStage(SessionStage.onboarding);
-  void setThemeMode(ThemeMode m) {
-    themeMode = m;
-    notifyListeners();
-  }
-
-  void setSearch(String q) {
-    searchQuery = q;
-    notifyListeners();
-  }
-
   void _authed(Map<String, dynamic> m) {
     if (m['access_token'] != null) {
       api.accessToken = m['access_token'].toString();
@@ -100,12 +92,6 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  Future<void> loginWithMetaToken(String token) async {
-    _authed(await api.hatchLogin(token));
-    setStage(SessionStage.main);
-    await bootstrap();
-  }
-
   Future<void> startPhone(String phone) async {
     final m = await api.authStart(phone);
     challengeId = m['challenge_id']?.toString();
@@ -118,10 +104,6 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> selectAccount(String accountId) async {
-    _authed(await api.selectAccount(accountId));
-    notifyListeners();
-  }
   Future<void> activateVm() async {
     try {
       final vms = await api.fetchVms();
@@ -141,15 +123,6 @@ class AppState extends ChangeNotifier {
     }
     notifyListeners();
   }
-
-  Future<void> wakeVm() async {
-    final m = await api.wakeVm(vmId ?? 'vm-offline');
-    vmId = m['vm_id']?.toString() ?? vmId;
-    vmStatus = (m['status'] ?? 'active').toString();
-    notifyListeners();
-  }
-
-  void completePin() => setStage(SessionStage.main);
 
   Future<void> loadThreads() async {
     try {
@@ -175,15 +148,29 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> sendMessage(String text) async {
+  Future<void> sendMessage(String text,
+      {List<Map<String, dynamic>> attachments = const []}) async {
     final tid = currentThreadId ?? 't1';
     currentThreadId = tid;
+    final cards = <Map<String, dynamic>>[];
+    for (final a in attachments) {
+      final up = await api.uploadAttachment(
+        name: (a['name'] ?? 'upload.bin').toString(),
+        mime: (a['mime'] ?? 'application/octet-stream').toString(),
+        bytes: List<int>.from(a['bytes'] as List),
+      );
+      cards.add({
+        'kind': 'image',
+        'title': (up['name'] ?? '').toString(),
+        'url': '/api/fs/raw?name=${Uri.encodeComponent((up['name'] ?? '').toString())}',
+      });
+    }
     final user = {
       'id': 'u${DateTime.now().millisecondsSinceEpoch}',
       'role': 'user',
       'text': text,
       'ts': DateTime.now().toUtc().toIso8601String(),
-      'cards': []
+      'cards': cards
     };
     messages.putIfAbsent(tid, () => []).add(user);
     notifyListeners();
@@ -199,6 +186,17 @@ class AppState extends ChangeNotifier {
         'ts': DateTime.now().toUtc().toIso8601String(),
         'cards': []
       });
+    }
+    notifyListeners();
+  }
+
+  void pinThread(String id) {
+    final i = threads.indexWhere((t) => t['id'].toString() == id);
+    if (i <= 0) return;
+    final t = threads.removeAt(i);
+    threads.insert(0, t);
+    if (currentThreadId == null && threads.isNotEmpty) {
+      currentThreadId = threads.first['id'].toString();
     }
     notifyListeners();
   }

@@ -13,7 +13,8 @@
       "text": "Here is a 2-day plan.",
       "ts": "2026-09-08T08:21:00Z",
       "cards": [],
-      "reply_to": "Hey Muse, plan my weekend in Paris"
+      "reply_to": "Hey Muse, plan my weekend in Paris",
+      "reply_group": "turn1"
     },
     {
       "id": "m3",
@@ -21,7 +22,8 @@
       "text": "Day 1: Louvre in the morning, Seine cruise at sunset.",
       "ts": "2026-09-08T08:21:10Z",
       "cards": [],
-      "reply_to": "Hey Muse, plan my weekend in Paris"
+      "reply_to": "Hey Muse, plan my weekend in Paris",
+      "reply_group": "turn1"
     },
     {
       "id": "m4",
@@ -29,7 +31,8 @@
       "text": "Day 2: Montmartre and the Marais.",
       "ts": "2026-09-08T08:21:20Z",
       "cards": [],
-      "reply_to": "Hey Muse, plan my weekend in Paris"
+      "reply_to": "Hey Muse, plan my weekend in Paris",
+      "reply_group": "turn1"
     },
     {
       "id": "m5",
@@ -43,14 +46,9 @@
       "role": "agent",
       "text": "Here is the demo picture.",
       "ts": "2026-09-08T08:23:00Z",
-      "cards": [
-        {
-          "kind": "image",
-          "url": "/api/demo-image",
-          "title": "demo.jpg"
-        }
-      ],
-      "reply_to": "Thanks! That looks great."
+      "cards": [],
+      "reply_to": "Thanks! That looks great.",
+      "reply_group": "turn2"
     },
     {
       "id": "m7",
@@ -58,7 +56,8 @@
       "text": "Glad you like it! Anything else I can plan for you?",
       "ts": "2026-09-08T08:24:00Z",
       "cards": [],
-      "reply_to": "Thanks! That looks great."
+      "reply_to": "Thanks! That looks great.",
+      "reply_group": "turn3"
     }
   ],
   "t2": [

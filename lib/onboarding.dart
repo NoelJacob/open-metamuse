@@ -19,23 +19,12 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   int _step = 0; // 0 landing 1 phone 2 otp 3 accounts 4 connectors 5 identity 6 activation 7 pin
   final _phone = TextEditingController();
   String _code = '';
-  bool _attempted = false;
-  final _name = TextEditingController();
-  final _meta = TextEditingController();
-  final _pin = TextEditingController();
   String? _error;
   bool _busy = false;
-  final _accounts = const [
-    {'id': 'u1', 'name': 'Muse User'},
-    {'id': 'u2', 'name': 'Work Profile'},
-  ];
 
   @override
   void dispose() {
     _phone.dispose();
-    _name.dispose();
-    _meta.dispose();
-    _pin.dispose();
     super.dispose();
   }
 
@@ -56,8 +45,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   }
 
   void _activationDone() {
-    _s.setStage(SessionStage.pin);
-    setState(() => _step = 7);
+    _s.setStage(SessionStage.main);
   }
 
   @override
@@ -95,7 +83,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                 children: [
                   const SizedBox(height: 48),
                   Center(
-                    child: SvgPicture.asset('assets/muse_logo.svg',
+                    child: SvgPicture.asset('assets/icons/muse_logo.svg',
                         width: 84, height: 84),
                   ),
                   const SizedBox(height: 28),
@@ -190,7 +178,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                         Border.all(color: const Color(0xFFE2E3E8), width: 1.5),
                   ),
                   child: Center(
-                    child: SvgPicture.asset('assets/muse_gear.svg',
+                    child: SvgPicture.asset('assets/icons/muse_gear.svg',
                         width: 24, height: 24),
                   ),
                 ),
@@ -224,58 +212,20 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       case 2:
         return _otpPage();
       case 3:
-        return _frame('Choose an account', [
-          for (final a in _accounts)
-            ListTile(
-              title: Text(a['name']!),
-              onTap: () => _run(() async {
-                await _s.selectAccount(a['id']!);
-                setState(() => _step = 4);
-              }),
-            ),
-        ]);
       case 4:
-        return _frame('Link connectors (optional)', [
-          for (final c in _s.connectorList)
-            SwitchListTile(
-              title: Text((c['name'] ?? c['id']).toString()),
-              value: (c['linked'] as bool?) ?? false,
-              onChanged: (v) =>
-                  setState(() => c['linked'] = v), // ponytail: local stub
-            ),
-          _go('Continue', () async => setState(() => _step = 5)),
-        ]);
       case 5:
-        return _frame('What should Muse call you?', [
-          TextField(
-              controller: _name,
-              decoration: const InputDecoration(labelText: 'Name')),
-          _go('Continue', () async {
-            if (_name.text.trim().isNotEmpty) {
-              _s.userName = _name.text.trim();
-            }
-            setState(() => _step = 6);
-            _s.setStage(SessionStage.activation);
-            await _run(() async {
-              await _s.activateVm();
-              _activationDone();
-            });
-          }),
-        ]);
       case 7:
-        return _frame('Set a 4-digit PIN', [
-          TextField(
-            controller: _pin,
-            keyboardType: TextInputType.number,
-            maxLength: 4,
-            decoration: const InputDecoration(labelText: 'PIN'),
-            onChanged: (v) {
-              if (v.length == 4) {
-                _s.completePin();
-                _run(() => _s.bootstrap());
-              }
-            },
-          ),
+        // ponytail: account/connectors/identity/PIN stand-ins removed;
+        // original skips them offline, activation pass-through remains.
+        _s.setStage(SessionStage.activation);
+        Future.microtask(() async {
+          await _run(() async {
+            await _s.activateVm();
+            _activationDone();
+          });
+        });
+        return _frame('Activating…', const [
+          Center(child: CircularProgressIndicator()),
         ]);
       default:
         return _frame('Welcome to Muse', [
@@ -284,13 +234,6 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
             _s.beginOnboarding();
             await _run(() => _s.loadHub());
             setState(() => _step = 1);
-          }),
-          TextField(
-              controller: _meta,
-              decoration: const InputDecoration(
-                  labelText: 'Meta token (optional shortcut)')),
-          _go('Login with token', () async {
-            await _s.loginWithMetaToken(_meta.text.trim());
           }),
         ]);
     }
@@ -309,15 +252,28 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
             children: [
               Align(
                 alignment: Alignment.centerLeft,
-                child: IconButton(
-                  onPressed: () => setState(() => _step = 0),
-                  icon: const Icon(Icons.arrow_back, color: Colors.black),
+                child: InkWell(
+                  onTap: () => setState(() => _step = 0),
+                  customBorder: const CircleBorder(),
+                  child: Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                          color: const Color(0xFFE2E3E8), width: 1.5),
+                    ),
+                    child: const Icon(Icons.arrow_back, size: 22),
+                  ),
                 ),
               ),
               const SizedBox(height: 8),
               Center(
-                child: SvgPicture.asset('assets/muse_logo.svg',
-                    width: 56, height: 56),
+                child: SvgPicture.asset('assets/icons/muse_logo.svg',
+                    width: 64,
+                    height: 64,
+                    colorFilter: const ColorFilter.mode(
+                        Color(0xFF0064E0), BlendMode.srcIn)),
               ),
               const SizedBox(height: 20),
               const Padding(
@@ -360,10 +316,12 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
               _OtpBoxes(
                 onUpdate: (c) => setState(() => _code = c),
                 onDone: (code) {
-                  setState(() => _attempted = true);
                   _run(() async {
                     await _s.confirmOtp(code);
-                    setState(() => _step = 3);
+                    _s.setStage(SessionStage.activation);
+                    await _s.activateVm();
+                    _s.setStage(SessionStage.main);
+                    await _s.bootstrap();
                   });
                 },
               ),
@@ -373,22 +331,21 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                 child: SizedBox(
                   height: 48,
                   child: FilledButton(
-                    onPressed: _busy
+                    onPressed: _busy || _code.length < 6
                         ? null
                         : () {
-                            setState(() => _attempted = true);
                             _run(() async {
                               await _s.confirmOtp(_code);
-                              setState(() => _step = 3);
+                              _s.setStage(SessionStage.activation);
+                              await _s.activateVm();
+                              _s.setStage(SessionStage.main);
+                              await _s.bootstrap();
                             });
                           },
                     style: FilledButton.styleFrom(
                       shape: const StadiumBorder(),
                       backgroundColor: const Color(0xFF0064E0),
-                      disabledBackgroundColor:
-                          _attempted || _code.isNotEmpty
-                              ? const Color(0xFF0064E0)
-                              : const Color(0xFFB4CFFC),
+                      disabledBackgroundColor: const Color(0xFFB4CFFC),
                     ),
                     child: _busy
                         ? const SizedBox(
@@ -404,15 +361,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
-              Center(
-                child: TextButton(
-                  onPressed: () {},
-                  child: const Text('Try another way',
-                      style: TextStyle(
-                          fontSize: 16, color: Color(0xFF0064E0))),
-                ),
-              ),
+
               if (_error != null) ...[
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -460,10 +409,9 @@ class _SmsNotice extends StatelessWidget {
           const TextSpan(
               text:
                   'You may receive SMS notifications from us by using your mobile number. '),
-          TextSpan(
+          const TextSpan(
             text: 'Learn more',
-            style: const TextStyle(color: Color(0xFF0064E0)),
-            recognizer: TapGestureRecognizer()..onTap = () {},
+            style: TextStyle(color: Color(0xFF0064E0)),
           ),
         ],
       ),
@@ -524,8 +472,8 @@ class _OtpBoxesState extends State<_OtpBoxes> {
       children: [
         for (var i = 0; i < 6; i++) ...[
           Expanded(
-            child: AspectRatio(
-              aspectRatio: 1.0,
+            child: SizedBox(
+              height: 62,
               child: TextField(
                 controller: _ctls[i],
                 focusNode: _nodes[i],
@@ -543,10 +491,10 @@ class _OtpBoxesState extends State<_OtpBoxes> {
                   fillColor: const Color(0xFFF0F1F5),
                   contentPadding: EdgeInsets.zero,
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
                       borderSide: BorderSide.none),
                   focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
                       borderSide: const BorderSide(
                           color: Color(0xFF0064E0), width: 2)),
                 ),
@@ -554,7 +502,7 @@ class _OtpBoxesState extends State<_OtpBoxes> {
               ),
             ),
           ),
-          if (i < 5) const SizedBox(width: 8),
+          if (i < 5) const SizedBox(width: 10),
         ],
       ],
     );

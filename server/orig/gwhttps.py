@@ -101,6 +101,61 @@ class Handler(BaseHTTPRequestHandler):
         if p.endswith("/api/chat/unread-count"):
             return _send(self, {"result": {"has_unread_threads": False},
                                 "has_unread_threads": False})
+        if p.endswith("/api/feed/units"):
+            units = [
+                {"id": "f1", "kind": "suggestion",
+                 "title": "Good morning!",
+                 "subtitle": "Things to try today"},
+                {"id": "f2", "kind": "reminder",
+                 "title": "Weekend getaway",
+                 "subtitle": "Don't forget your plans"},
+                {"id": "f3", "kind": "tip", "title": "Try voice chat",
+                 "subtitle": "Ask me anything"},
+                {"id": "f4", "kind": "news", "title": "Fresh updates",
+                 "subtitle": "Fresh updates for you"},
+            ]
+            return _send(self, {"result": {"units": units},
+                                "units": units})
+        if p.endswith("/api/goals/list"):
+            goals = [
+                {"id": "g1", "title": "Plan weekend trip",
+                 "status": "active", "progress": 0.4},
+                {"id": "g2", "title": "Learn sourdough",
+                 "status": "active", "progress": 0.1},
+            ]
+            return _send(self, {"result": {"goals": goals},
+                                "goals": goals})
+        if p.endswith("/api/library/artifacts"):
+            items = [{"id": "a1", "title": "Weekend plan",
+                      "kind": "document"}]
+            return _send(self, {"result": {"items": items},
+                                "items": items})
+        if p.endswith("/api/library/media"):
+            items = [{"id": "d1", "kind": "image", "label": "demo.jpg",
+                      "path": "workspace/user/files/demo_0_ab12.jpg"}]
+            return _send(self, {"result": {"items": items},
+                                "items": items})
+        if p.endswith("/api/spaces/list"):
+            spaces = [{"id": "s1", "title": "Trip planning",
+                       "member_count": 2}]
+            return _send(self, {"result": {"spaces": spaces},
+                                "spaces": spaces})
+        if p.endswith("/api/memory/list"):
+            mem = [{"id": "mem1", "title": "Weekend trip",
+                    "snippet": "Paris, 2 days"}]
+            return _send(self, {"result": {"entries": mem},
+                                "entries": mem})
+        if p.endswith("/api/connectors/list"):
+            conns = [
+                {"id": "whatsapp", "name": "WhatsApp", "linked": False},
+                {"id": "telegram", "name": "Telegram", "linked": False},
+                {"id": "messenger", "name": "Messenger", "linked": False},
+            ]
+            return _send(self, {"result": {"connectors": conns},
+                                "connectors": conns})
+        if p.endswith("/api/subscription"):
+            return _send(self, {"result": {"plan": "free", "credits": 100},
+                                "plan": "free", "credits": 100})
         if p.endswith("/fs/upload"):
             length = int(self.headers.get("Content-Length", 0) or 0)
             if length:

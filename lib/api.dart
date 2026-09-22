@@ -152,7 +152,7 @@ class ApiClient {
         }
         return {
           'data': {
-            'reply': {'text': 'Echo: $prompt', 'cards': []}
+            'reply': {'text': prompt, 'cards': []}
           }
         };
       case '/api/session/list':
@@ -162,35 +162,62 @@ class ApiClient {
       case '/api/session/archive':
         return {'ok': true};
       case '/api/chat/history':
-        final tid = Uri.parse('http://x$path').queryParameters['thread_id'];
         return {
           'messages': [
             {
               'id': 'm1',
               'role': 'user',
-              'text': 'Hello Muse',
-              'ts': _ts(),
+              'text': 'Hey Muse, plan my weekend in Paris',
+              'ts': '2026-09-08T08:20:00Z',
               'cards': []
             },
             {
               'id': 'm2',
               'role': 'agent',
-              'text': 'Hi! You are viewing ${tid ?? 't1'} offline.',
-              'ts': _ts(),
+              'text': 'Here is a 2-day plan.',
+              'ts': '2026-09-08T08:21:00Z',
+              'reply_to': 'Hey Muse, plan my weekend in Paris',
+              'cards': []
+            },
+            {
+              'id': 'm3',
+              'role': 'agent',
+              'text': 'Day 1: Louvre in the morning, Seine cruise at sunset.',
+              'ts': '2026-09-08T08:21:10Z',
+              'reply_to': 'Hey Muse, plan my weekend in Paris',
+              'cards': []
+            },
+            {
+              'id': 'm4',
+              'role': 'agent',
+              'text': 'Day 2: Montmartre and the Marais.',
+              'ts': '2026-09-08T08:21:20Z',
+              'reply_to': 'Hey Muse, plan my weekend in Paris',
+              'cards': []
+            },
+            {
+              'id': 'm5',
+              'role': 'user',
+              'text': 'Thanks! That looks great.',
+              'ts': '2026-09-08T08:22:00Z',
+              'cards': []
+            },
+            {
+              'id': 'm6',
+              'role': 'agent',
+              'text': 'Here is the demo picture.',
+              'ts': '2026-09-08T08:23:00Z',
+              'reply_to': 'Thanks! That looks great.', 'cards': []
+            },
+            {
+              'id': 'm7',
+              'role': 'agent',
+              'text': 'Glad you like it! Anything else I can plan for you?',
+              'ts': '2026-09-08T08:24:00Z',
+              'reply_to': 'Thanks! That looks great.',
               'cards': []
             },
           ]
-        };
-      case '/api/chat/send':
-        final text = (body?['text'] ?? '').toString();
-        return {
-          'message': {
-            'id': 'm${DateTime.now().millisecondsSinceEpoch}',
-            'role': 'agent',
-            'text': text.isEmpty ? 'Echo' : text,
-            'ts': _ts(),
-            'cards': []
-          }
         };
       case '/api/feed':
         return {'units': _cannedFeed()};
@@ -224,13 +251,9 @@ class ApiClient {
   Future<Map<String, dynamic>> confirmOtp(String challengeId, String code) =>
       _post('/hatch/auth/confirm_otp',
           {'challenge_id': challengeId, 'code': code});
-  Future<Map<String, dynamic>> selectAccount(String accountId) =>
-      _post('/hatch/auth/select_account', {'account_id': accountId});
   Future<Map<String, dynamic>> fetchVms() =>
       _get('/hatch/fetch_vms?notary_token=true');
   Future<Map<String, dynamic>> leaseVm() => _post('/hatch/lease_vm', {});
-  Future<Map<String, dynamic>> wakeVm(String vmId) =>
-      _post('/hatch/vm/wake', {'vm_id': vmId});
   Future<Map<String, dynamic>> graphql(String query,
           [Map<String, dynamic>? variables]) =>
       _post('/graphql', {'query': query, 'variables': variables ?? {}});
@@ -245,6 +268,18 @@ class ApiClient {
       _get('/api/chat/history?thread_id=$threadId');
   Future<Map<String, dynamic>> chatSend(String threadId, String text) =>
       _post('/api/chat/send', {'thread_id': threadId, 'text': text});
+
+  Future<Map<String, dynamic>> uploadAttachment(
+          {required String name,
+          required String mime,
+          required List<int> bytes}) =>
+      _post('/api/fs/upload', {
+        'name': name,
+        'mime': mime,
+        // ponytail: JSON envelope (not real multipart) because the mock body
+        // parser is JSON-only; the original posts binary to fs/upload.
+        'bytes_b64': base64Encode(bytes),
+      });
   Future<Map<String, dynamic>> feed() => _get('/api/feed');
   Future<Map<String, dynamic>> connectors() => _get('/api/connectors');
   Future<Map<String, dynamic>> subscription() => _get('/hatch/subscription');

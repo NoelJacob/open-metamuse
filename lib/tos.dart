@@ -18,17 +18,17 @@ class _TosScreenState extends State<TosScreen> {
 
   static const _rows = [
     (
-      'assets/muse_shield_check.svg',
+      'assets/icons/muse_shield_check.svg',
       'Can take actions for you',
       "With your approval, your agent can send messages, edit files, make purchases, and take actions in apps you've connected. You control what it can access in Settings.",
     ),
     (
-      'assets/muse_clock.svg',
+      'assets/icons/muse_clock.svg',
       'Works around the clock',
       'Your agent can continue working on tasks after you close the app. Check in to keep it on track and intervene if needed.',
     ),
     (
-      'assets/muse_eye.svg',
+      'assets/icons/muse_eye.svg',
       'Smart, but still learning',
       "It may make mistakes or take unexpected actions. It's built to ask before taking sensitive actions, but supervision is recommended.",
     ),
@@ -63,7 +63,7 @@ class _TosScreenState extends State<TosScreen> {
                       children: [
                         const SizedBox(height: 64),
                         Center(
-                          child: SvgPicture.asset('assets/muse_logo.svg',
+                          child: SvgPicture.asset('assets/icons/muse_logo.svg',
                               width: 76, height: 76),
                         ),
                         const SizedBox(height: 24),
@@ -184,7 +184,7 @@ class _TosScreenState extends State<TosScreen> {
                         color: const Color(0xFFE2E3E8), width: 1.5),
                   ),
                   child: Center(
-                    child: SvgPicture.asset('assets/muse_gear.svg',
+                    child: SvgPicture.asset('assets/icons/muse_gear.svg',
                         width: 24, height: 24),
                   ),
                 ),

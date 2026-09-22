@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 
 import 'settings.dart';
 import 'state.dart';
 
-// ponytail: stock cards + two bottom sheets; no share plugin.
+// ponytail: stock cards + two bottom sheets; units carry no URL offline so
+// the sheet offers Share only (no Copy-link row to invent).
 class FeedScreen extends StatelessWidget {
   final AppState state;
   const FeedScreen({super.key, required this.state});
@@ -19,18 +21,10 @@ class FeedScreen extends StatelessWidget {
               leading: const Icon(Icons.share_outlined),
               title: const Text('Share'),
               onTap: () {
+                final text =
+                    '${u['title'] ?? ''}\n${u['subtitle'] ?? ''}'.trim();
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Share is a stub')));
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.copy),
-              title: const Text('Copy link'),
-              onTap: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Copy link is a stub')));
+                Share.share(text);
               },
             ),
           ],

@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/open-metamuse.iml" filepath="$PROJECT_DIR$/.idea/open-metamuse.iml" />
+      <module fileurl="file://$PROJECT_DIR$/openmetamuse.iml" filepath="$PROJECT_DIR$/openmetamuse.iml" />
+      <module fileurl="file://$PROJECT_DIR$/android/openmetamuse_android.iml" filepath="$PROJECT_DIR$/android/openmetamuse_android.iml" />
     </modules>
   </component>
 </project>

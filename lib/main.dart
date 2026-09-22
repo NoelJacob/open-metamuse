@@ -9,7 +9,6 @@ import 'tos.dart';
 
 void main() => runApp(const MuseApp());
 
-// ponytail: ListenableBuilder on AppState; no provider package.
 class MuseApp extends StatefulWidget {
   const MuseApp({super.key});
 

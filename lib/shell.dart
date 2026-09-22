@@ -1,20 +1,14 @@
-import 'dart:io' show Platform;
+import 'package:permission_handler/permission_handler.dart';
 
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'chat.dart';
 import 'feed.dart';
-import 'settings.dart';
 import 'state.dart';
 import 'tabs.dart';
 import 'theme.dart';
 
-// ponytail: kIsWeb-guarded Platform check; three layouts, one tab index.
-bool get _isApple =>
-    !kIsWeb && (Platform.isIOS || Platform.isMacOS);
-
+// ponytail: Android-only shell; desktop rail and Cupertino chrome removed.
 class AdaptiveShell extends StatefulWidget {
   final AppState state;
   const AdaptiveShell({super.key, required this.state});
@@ -25,12 +19,96 @@ class AdaptiveShell extends StatefulWidget {
 
 class _AdaptiveShellState extends State<AdaptiveShell> {
   int _tab = 0;
+  bool _gateShown = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _notifGate());
+  }
+
+  // ponytail: original asks once over first-run main chat; either answer
+  // proceeds, and the showing flag survives rebuilds for this session.
+  // ponytail: pre-granted at install/funnel (user instruction) — never ask twice.
+  void _notifGate() async {
+    if (_gateShown || !mounted) return;
+    _gateShown = true;
+    if (await Permission.notification.isGranted) return;
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => Dialog(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(28)),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Center(
+                child: Icon(Icons.notifications_outlined,
+                    size: 40, color: Color(0xFF6F7278)),
+              ),
+              const SizedBox(height: 12),
+              RichText(
+                textAlign: TextAlign.center,
+                text: const TextSpan(
+                  style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.black,
+                      height: 1.25),
+                  children: [
+                    TextSpan(text: 'Allow '),
+                    TextSpan(
+                        text: 'Muse',
+                        style: TextStyle(fontWeight: FontWeight.w700)),
+                    TextSpan(text: ' to send you\nnotifications?'),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                height: 52,
+                child: FilledButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: FilledButton.styleFrom(
+                    shape: const StadiumBorder(),
+                    backgroundColor: const Color(0xFF0064E0),
+                  ),
+                  child: const Text('Allow',
+                      style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white)),
+                ),
+              ),
+              const SizedBox(height: 4),
+              SizedBox(
+                height: 52,
+                child: FilledButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: FilledButton.styleFrom(
+                    shape: const StadiumBorder(),
+                    backgroundColor: const Color(0xFFF0F1F5),
+                  ),
+                  child: const Text('Don\u2019t allow',
+                      style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (_isApple) return _cupertino();
-    final wide = MediaQuery.widthOf(context) >= 800;
-    if (wide) return _desktop();
     return _android();
   }
 
@@ -41,12 +119,6 @@ class _AdaptiveShellState extends State<AdaptiveShell> {
         LibraryScreen(state: widget.state),
       ];
 
-  Widget _centered(Widget child) => Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 720),
-          child: child,
-        ),
-      );
   // Android: custom 48dp tab row (measured: y2219-2345 content).
   Widget _android() {
     return Scaffold(
@@ -67,90 +139,6 @@ class _AdaptiveShellState extends State<AdaptiveShell> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-
-  // Desktop: NavigationRail + centered 720px content.
-  Widget _desktop() {
-    final cs = Theme.of(context).colorScheme;
-    return Scaffold(
-      body: Row(
-        children: [
-          NavigationRail(
-            selectedIndex: _tab,
-            onDestinationSelected: (i) => setState(() => _tab = i),
-            labelType: NavigationRailLabelType.all,
-            destinations: [
-              NavigationRailDestination(
-                icon: MuseTabIcons.chatOutline(color: cs.onSurfaceVariant),
-                selectedIcon: MuseTabIcons.chatFilled(color: cs.primary),
-                label: const Text('CHAT'),
-              ),
-              NavigationRailDestination(
-                icon: MuseTabIcons.bulb(color: cs.onSurfaceVariant),
-                selectedIcon: MuseTabIcons.bulb(color: cs.primary),
-                label: const Text('IDEAS'),
-              ),
-              NavigationRailDestination(
-                icon: MuseTabIcons.check(color: cs.onSurfaceVariant),
-                selectedIcon: MuseTabIcons.checkFilled(color: cs.primary),
-                label: const Text('GOALS'),
-              ),
-              NavigationRailDestination(
-                icon: MuseTabIcons.grid(color: cs.onSurfaceVariant),
-                selectedIcon: MuseTabIcons.grid(color: cs.primary),
-                label: const Text('LIBRARY'),
-              ),
-            ],
-            trailing: IconButton(
-              tooltip: 'Settings',
-              icon: const Icon(Icons.settings_outlined),
-              onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (_) => SettingsScreen(state: widget.state))),
-            ),
-          ),
-          const VerticalDivider(width: 1),
-          Expanded(
-              child: _centered(IndexedStack(index: _tab, children: _tabs))),
-        ],
-      ),
-    );
-  }
-
-  // iOS/macOS: CupertinoTabBar.
-  Widget _cupertino() {
-    return CupertinoTabScaffold(
-      tabBar: CupertinoTabBar(
-        items: [
-          BottomNavigationBarItem(
-            icon:
-                MuseTabIcons.chatOutline(color: CupertinoColors.inactiveGray),
-            activeIcon:
-                MuseTabIcons.chatFilled(color: CupertinoColors.activeBlue),
-            label: 'CHAT',
-          ),
-          BottomNavigationBarItem(
-            icon: MuseTabIcons.bulb(color: CupertinoColors.inactiveGray),
-            activeIcon: MuseTabIcons.bulb(color: CupertinoColors.activeBlue),
-            label: 'IDEAS',
-          ),
-          BottomNavigationBarItem(
-            icon: MuseTabIcons.check(color: CupertinoColors.inactiveGray),
-            activeIcon:
-                MuseTabIcons.checkFilled(color: CupertinoColors.activeBlue),
-            label: 'GOALS',
-          ),
-          BottomNavigationBarItem(
-            icon: MuseTabIcons.grid(color: CupertinoColors.inactiveGray),
-            activeIcon: MuseTabIcons.grid(color: CupertinoColors.activeBlue),
-            label: 'LIBRARY',
-          ),
-        ],
-      ),
-      tabBuilder: (context, i) => CupertinoTabView(
-        builder: (_) => _centered(_tabs[i]),
       ),
     );
   }
@@ -185,7 +173,8 @@ class _TabCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final color = selected ? cs.primary : cs.onSurfaceVariant;
+    // ponytail: original selected tab is near-black, not brand blue.
+    final color = selected ? Colors.black : cs.onSurfaceVariant;
     return Semantics(
       label: _labels[index],
       button: true,

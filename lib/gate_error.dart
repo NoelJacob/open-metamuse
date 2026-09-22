@@ -83,7 +83,7 @@ class GateErrorScreen extends StatelessWidget {
                           color: const Color(0xFFE2E3E8), width: 1.5),
                     ),
                     child: Center(
-                      child: SvgPicture.asset('assets/muse_gear.svg',
+                      child: SvgPicture.asset('assets/icons/muse_gear.svg',
                           width: 24, height: 24),
                     ),
                   ),

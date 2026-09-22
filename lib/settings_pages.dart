@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'state.dart';
+import 'package:permission_handler/permission_handler.dart';
+
 // ponytail: static grouped-card ports; form submits stay disabled, no backend.
 const _bg = Color(0xFFF0F1F5);
 const _muted = Color(0xFF6F7278);
@@ -139,11 +142,6 @@ Widget _disabledPill(String label) => SizedBox(
       ),
     );
 
-void _stub(BuildContext context, String what) {
-  ScaffoldMessenger.of(context)
-      .showSnackBar(SnackBar(content: Text('$what is a stub')));
-}
-
 const _chev =
     Icon(Icons.chevron_right, color: Color(0xFFC7C9D1), size: 24);
 const _ext = Icon(Icons.north_east, color: Color(0xFFC7C9D1), size: 20);
@@ -188,7 +186,7 @@ class LegalInfoScreen extends StatelessWidget {
             _Row(
                 label: _rows[i],
                 trailing: _ext,
-                onTap: () => _stub(context, _rows[i])),
+                onTap: null),
             if (i != _rows.length - 1) _divider(),
           ],
         ]),
@@ -216,22 +214,16 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
           _Row(
               label: 'Muse Help Center',
               trailing: _ext,
-              onTap: () => _stub(context, 'Muse Help Center')),
+              onTap: null),
           _divider(),
           _Row(
-              label: 'Contact customer support',
+              label: 'Submit feedback',
               trailing: _chev,
               onTap: () => Navigator.of(context).push(MaterialPageRoute(
                   builder: (_) => const SubmitFeedbackScreen()))),
         ]),
         const SizedBox(height: 16),
         _Card(children: [
-          _Row(
-              label: 'Report an issue',
-              trailing: _chev,
-              onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (_) => const ReportIssueScreen()))),
-          _divider(),
           Padding(
             padding:
                 const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -256,14 +248,20 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
   }
 }
 
-class SubmitFeedbackScreen extends StatelessWidget {
+class SubmitFeedbackScreen extends StatefulWidget {
   const SubmitFeedbackScreen({super.key});
 
+  @override
+  State<SubmitFeedbackScreen> createState() => _SubmitFeedbackScreenState();
+}
+
+class _SubmitFeedbackScreenState extends State<SubmitFeedbackScreen> {
   static const _topics = [
     'Account access and sign-in',
     "Something's not working",
     'Safety and privacy',
   ];
+  int _topic = -1;
 
   @override
   Widget build(BuildContext context) {
@@ -298,8 +296,14 @@ class SubmitFeedbackScreen extends StatelessWidget {
           for (var i = 0; i < _topics.length; i++) ...[
             _Row(
                 label: _topics[i],
-                trailing: const SizedBox.shrink(),
-                onTap: () => _stub(context, _topics[i])),
+                trailing: Icon(
+                    _topic == i
+                        ? Icons.check_circle
+                        : Icons.circle_outlined,
+                    color: _topic == i
+                        ? const Color(0xFF0064E0)
+                        : const Color(0xFFC7C9D1)),
+                onTap: () => setState(() => _topic = i)),
             if (i != _topics.length - 1) _divider(),
           ],
         ]),
@@ -417,6 +421,309 @@ class ReportIssueScreen extends StatelessWidget {
         ),
         const SizedBox(height: 32),
         _disabledPill('Submit Report'),
+      ],
+    );
+  }
+}
+
+/// ponytail: tapped original rows — Notifications, App lock, Data controls,
+/// Connector defaults. Controls are local-only; no backend exists offline.
+class NotificationsScreen extends StatefulWidget {
+  const NotificationsScreen({super.key});
+
+  @override
+  State<NotificationsScreen> createState() => _NotificationsScreenState();
+}
+
+class _NotificationsScreenState extends State<NotificationsScreen> {
+  // ponytail: original defaults OFF with the caption below the card.
+  bool _enabled = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return _SubPage(
+      title: 'Notifications',
+      children: [
+        _Card(children: [
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            child: Row(
+              children: [
+                const Expanded(
+                  child: Text('Allow notifications',
+                      style: TextStyle(fontSize: 17, color: Colors.black)),
+                ),
+                Switch(
+                  value: _enabled,
+                  activeThumbColor: _link,
+                  onChanged: (v) => setState(() => _enabled = v),
+                ),
+              ],
+            ),
+          ),
+        ]),
+        const Padding(
+          padding: EdgeInsets.fromLTRB(20, 8, 20, 0),
+          child: Text(
+              'Get notified when your agent responds or completes a task.',
+              style: TextStyle(fontSize: 13, color: Color(0xFF6F7278))),
+        ),
+      ],
+    );
+  }
+}
+
+class AppLockScreen extends StatefulWidget {
+  const AppLockScreen({super.key});
+
+  @override
+  State<AppLockScreen> createState() => _AppLockScreenState();
+}
+
+class _AppLockScreenState extends State<AppLockScreen> {
+  bool _enabled = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return _SubPage(
+      title: 'App lock',
+      children: [
+        _Card(children: [
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            child: Row(
+              children: [
+                const Expanded(
+                  child: Text('Require biometrics',
+                      style: TextStyle(fontSize: 17, color: Colors.black)),
+                ),
+                Switch(
+                  value: _enabled,
+                  activeThumbColor: _link,
+                  onChanged: (v) => setState(() => _enabled = v),
+                ),
+              ],
+            ),
+          ),
+        ]),
+        const Padding(
+          padding: EdgeInsets.fromLTRB(20, 8, 20, 0),
+          child: Text(
+              "You'll need to use your face or fingerprint to open the Muse app.",
+              style: TextStyle(fontSize: 13, color: Color(0xFF6F7278))),
+        ),
+      ],
+    );
+  }
+}
+
+class DataControlsScreen extends StatefulWidget {
+  const DataControlsScreen({super.key});
+
+  @override
+  State<DataControlsScreen> createState() => _DataControlsScreenState();
+}
+
+class _DataControlsScreenState extends State<DataControlsScreen> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return _SubPage(
+      title: 'Data controls',
+      children: [
+        _Card(children: [
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(Icons.shield_outlined,
+                    size: 28, color: Colors.black),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: RichText(
+                    text: const TextSpan(
+                      style: TextStyle(
+                          fontSize: 15,
+                          color: Colors.black,
+                          height: 1.35),
+                      children: [
+                        TextSpan(
+                            text: 'Your privacy is important to us\n',
+                            style: TextStyle(fontWeight: FontWeight.w700)),
+                        TextSpan(
+                            text:
+                                'Learn about the steps we take to keep your information private and secure. '),
+                        TextSpan(
+                            text: 'Learn more',
+                            style: TextStyle(color: Color(0xFF0064E0))),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ]),
+        const SizedBox(height: 16),
+        _Card(children: [
+          _Row(
+              label: 'Help improve our AI models',
+              trailing: Icon(
+                  _expanded ? Icons.expand_less : Icons.expand_more,
+                  color: const Color(0xFFC7C9D1),
+                  size: 24),
+              onTap: () => setState(() => _expanded = !_expanded)),
+          if (_expanded)
+            const Padding(
+              padding: EdgeInsets.fromLTRB(20, 0, 20, 18),
+              child: Text(
+                  'Allow us to use your interactions with Muse to develop and improve AI at Meta.',
+                  style: TextStyle(
+                      fontSize: 15,
+                      color: Color(0xFF6F7278),
+                      height: 1.35)),
+            ),
+        ]),
+        const Padding(
+          padding: EdgeInsets.fromLTRB(20, 8, 20, 0),
+          child: Text(
+              'Allow us to use your interactions with Muse to develop and improve AI at Meta.',
+              style: TextStyle(fontSize: 13, color: Color(0xFF6F7278))),
+        ),
+        const SizedBox(height: 16),
+        _Card(children: const [
+          _Row(
+              label: 'Import memory to Muse',
+              trailing: SizedBox.shrink()),
+        ]),
+      ],
+    );
+  }
+}
+
+class ConnectorDefaultsScreen extends StatefulWidget {
+  const ConnectorDefaultsScreen({super.key});
+
+  @override
+  State<ConnectorDefaultsScreen> createState() =>
+      _ConnectorDefaultsScreenState();
+}
+
+class _ConnectorDefaultsScreenState
+    extends State<ConnectorDefaultsScreen> {
+  String _mode = 'some';
+
+  @override
+  Widget build(BuildContext context) {
+    return _SubPage(
+      title: 'Connector defaults',
+      children: [
+        RadioGroup<String>(
+          groupValue: _mode,
+          onChanged: (v) => setState(() => _mode = v!),
+          child: _Card(children: [
+            const _Row(
+                label: 'Ask for some actions',
+                trailing: Radio<String>(value: 'some')),
+            _divider(),
+            const _Row(
+                label: 'Before every write and some read actions',
+                trailing: Radio<String>(value: 'write')),
+            _divider(),
+            const _Row(
+                label: 'Always ask',
+                trailing: Radio<String>(value: 'always')),
+          ]),
+        ),
+      ],
+    );
+  }
+}
+
+/// ponytail: original hub rows — Devices (honest offline empty state),
+/// Appearance (wires to the real app ThemeMode), Default assistant (opens
+/// OS settings; assistant choice itself is OS-owned).
+class DevicesScreen extends StatelessWidget {
+  const DevicesScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return _SubPage(
+      title: 'Devices',
+      children: const [
+        _Card(children: [
+          Padding(
+            padding: EdgeInsets.all(32),
+            child: Center(
+              child: Text('No devices connected',
+                  style: TextStyle(fontSize: 16, color: Color(0xFF6F7278))),
+            ),
+          ),
+        ]),
+      ],
+    );
+  }
+}
+
+class AppearanceScreen extends StatelessWidget {
+  final AppState state;
+  const AppearanceScreen({super.key, required this.state});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: state,
+      builder: (context, _) => _SubPage(
+        title: 'Appearance',
+        children: [
+          RadioGroup<ThemeMode>(
+            groupValue: state.themeMode,
+            onChanged: (v) => state.setTheme(v!),
+            child: _Card(children: [
+              const _Row(
+                  label: 'Light',
+                  trailing: Radio<ThemeMode>(value: ThemeMode.light)),
+              _divider(),
+              const _Row(
+                  label: 'Dark',
+                  trailing: Radio<ThemeMode>(value: ThemeMode.dark)),
+              _divider(),
+              const _Row(
+                  label: 'System',
+                  trailing: Radio<ThemeMode>(value: ThemeMode.system)),
+            ]),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class DefaultAssistantScreen extends StatelessWidget {
+  const DefaultAssistantScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return _SubPage(
+      title: 'Set as default assistant',
+      children: [
+        _Card(children: [
+          _Row(
+              label: 'Open system settings',
+              trailing: _chev,
+              onTap: () { openAppSettings(); }),
+        ]),
+        const Padding(
+          padding: EdgeInsets.fromLTRB(20, 8, 20, 0),
+          child: Text(
+              'Choose Muse as your default assistant app in system settings.',
+              style: TextStyle(fontSize: 13, color: Color(0xFF6F7278))),
+        ),
       ],
     );
   }

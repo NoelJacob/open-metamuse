@@ -95,6 +95,9 @@ def _json(flow, obj, status=200):
 
 
 def request(flow):
+    host = flow.request.pretty_host or ""
+    if "auth.meta.com" in host or "facebook.com" in host:
+        return
     global _tos_accepted
     host = flow.request.pretty_host
     path = flow.request.path.split("?")[0]
@@ -129,6 +132,93 @@ def request(flow):
         _log(flow, "STUB jarvis-unread")
         _json(flow, {"result": {"has_unread_threads": False},
                      "has_unread_threads": False})
+        return
+    if path.endswith("/api/feed/units"):
+        _log(flow, "STUB feed-units")
+        units = [
+            {"id": "f1", "kind": "suggestion", "title": "Good morning!",
+             "subtitle": "Things to try today"},
+            {"id": "f2", "kind": "reminder", "title": "Weekend getaway",
+             "subtitle": "Don't forget your plans"},
+            {"id": "f3", "kind": "tip", "title": "Try voice chat",
+             "subtitle": "Ask me anything"},
+            {"id": "f4", "kind": "news", "title": "Fresh updates",
+             "subtitle": "Fresh updates for you"},
+        ]
+        _json(flow, {"result": {"units": units}, "units": units})
+        return
+    if path.endswith("/api/goals/list"):
+        _log(flow, "STUB goals-list")
+        goals = [
+            {"id": "g1", "title": "Plan weekend trip",
+             "status": "active", "progress": 0.4},
+            {"id": "g2", "title": "Learn sourdough",
+             "status": "active", "progress": 0.1},
+        ]
+        _json(flow, {"result": {"goals": goals}, "goals": goals})
+        return
+    if "/api/goals/" in path and path.endswith("/detail"):
+        _log(flow, "STUB goals-detail")
+        _json(flow, {"result": {"goal": {"id": "g1",
+                     "title": "Plan weekend trip", "status": "active",
+                     "progress": 0.4,
+                     "steps": ["Pick dates", "Book stay"]}},
+                     "goal": {"id": "g1"}})
+        return
+    if path.endswith("/api/library/artifacts"):
+        _log(flow, "STUB library-artifacts")
+        items = [{"id": "a1", "title": "Weekend plan",
+                  "kind": "document"}]
+        _json(flow, {"result": {"items": items}, "items": items})
+        return
+    if path.endswith("/api/library/media"):
+        _log(flow, "STUB library-media")
+        items = [{"id": "d1", "kind": "image", "label": "demo.jpg",
+                  "path": "workspace/user/files/demo_0_ab12.jpg"}]
+        _json(flow, {"result": {"items": items}, "items": items})
+        return
+    if path.endswith("/api/spaces/list"):
+        _log(flow, "STUB spaces-list")
+        spaces = [{"id": "s1", "title": "Trip planning",
+                   "member_count": 2}]
+        _json(flow, {"result": {"spaces": spaces}, "spaces": spaces})
+        return
+    if path.endswith("/api/memory/list"):
+        _log(flow, "STUB memory-list")
+        mem = [{"id": "mem1", "title": "Weekend trip",
+                "snippet": "Paris, 2 days"}]
+        _json(flow, {"result": {"entries": mem}, "entries": mem})
+        return
+    if path.endswith("/api/connectors/list"):
+        _log(flow, "STUB connectors-list")
+        conns = [
+            {"id": "whatsapp", "name": "WhatsApp", "linked": False},
+            {"id": "telegram", "name": "Telegram", "linked": False},
+            {"id": "messenger", "name": "Messenger", "linked": False},
+        ]
+        _json(flow, {"result": {"connectors": conns}, "connectors": conns})
+        return
+    if path.endswith("/api/subscription"):
+        _log(flow, "STUB subscription")
+        _json(flow, {"result": {"plan": "free", "credits": 100},
+                     "plan": "free", "credits": 100})
+        return
+    if path.endswith("/api/settings/notifications"):
+        _log(flow, "STUB notif-settings")
+        _json(flow, {"result": {"enabled": True}, "enabled": True})
+        return
+    if path.endswith("/api/settings/data-controls"):
+        _log(flow, "STUB data-controls")
+        _json(flow, {"result": {"improve_models": False},
+                     "improve_models": False})
+        return
+    if path.endswith("/api/search"):
+        _log(flow, "STUB search")
+        q = flow.request.query.decode("utf-8", "replace") if hasattr(
+            flow.request, "query") else ""
+        _json(flow, {"result": {"results": [
+            {"id": "t1", "title": "Paris weekend", "snippet": q}]},
+            "results": []})
         return
     blocked = host.endswith(("meta.ai", "meta.com", "facebook.com", "fbcdn.net"))
     if blocked:
@@ -169,7 +259,17 @@ def request(flow):
             })
         elif path == "/hatch/tos_status":
             _log(flow, "STUB tos")
-            _json(flow, {"has_accepted_tos": _tos_accepted})
+            _json(flow, {
+                "has_accepted_tos": _tos_accepted,
+                # ponytail: full disclosure per TosStatusResponseJson; stub
+                # copy (offline fixture) — accept must echo text+version.
+                "disclosure_title": "Terms of Service (stub)",
+                "disclosure_text": "Stub terms for offline testing.",
+                "disclosure_version": "stub-v1",
+                "disclosure_button_text": "Continue",
+                "disclosure_entities": [],
+                "disclosure_sections": [],
+            })
         elif path == "/hatch/fetch_vms":
             _log(flow, "STUB vms-probe")
             _json(flow, {"vm_list": [{
@@ -217,7 +317,11 @@ def request(flow):
     elif path == "/hatch/accept_tos":
         _log(flow, "STUB accept-tos")
         _tos_accepted = True
-        _json(flow, {"ok": True})
+        _json(flow, {
+            "ok": True,
+            "has_accepted_tos": True,
+            "disclosure_version": "stub-v1",
+        })
         return
     if blocked and flow.response is None:
         _log(flow, "STUB generic-blocked")

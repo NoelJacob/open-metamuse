@@ -12,6 +12,7 @@ const connectors = load("connectors.json");
 const profile = load("profile.json");
 // ponytail: serve the existing orig binary; no new assets to manage.
 const demoImage = readFileSync(join(dir, "..", "orig", "demo.jpg"));
+const uploaded = {};
 
 const PORT = process.env.PORT || 8787;
 let n = 0;
@@ -68,6 +69,26 @@ const server = createServer((req, res) => {
     if (k === "GET /hatch/subscription") return r({ plan: "free", credits: 100 });
     if (k === "GET /hatch/viewer/profile") return r(profile);
     if (k === "GET /api/demo-image") return sendImage(res);
+    if (k === "POST /api/fs/upload") {
+      // ponytail: single-request contract — bytes ride with the metadata,
+      // and bytes_written is measured, never client-claimed.
+      const name = String(b.name ?? "upload.bin");
+      const mime = String(b.mime ?? "application/octet-stream");
+      const bytes = b.bytes_b64 ? Buffer.from(String(b.bytes_b64), "base64") : Buffer.alloc(0);
+      if (bytes.length > 8 * 1024 * 1024) return r({ error: "too large" }, 413);
+      const path = `workspace/user/files/${name}`;
+      uploaded[name] = { name, mime, size: bytes.length, path, bytes };
+      return r({ ok: true, path, name, mime, bytes_written: bytes.length });
+    }
+    const serveUpload = (res, name) => {
+      const hit = uploaded[String(name ?? "")];
+      if (!hit || !hit.bytes) return r({ error: "not found" }, 404);
+      res.writeHead(200, { "content-type": hit.mime, "content-length": hit.bytes.length });
+      return res.end(hit.bytes);
+    };
+    if (k === "GET /api/fs/raw") return serveUpload(res, u.searchParams.get("name"));
+    if (k === "GET /api/fs/thumbnail")
+      return serveUpload(res, u.searchParams.get("name"));
     if (k === "POST /hatch/accept_tos") return r({ ok: true });
     return r({ error: "not found" }, 404);
   });
