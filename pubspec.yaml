@@ -63,7 +63,6 @@ flutter:
     - assets/icons/
     - assets/muse-wordmark.png
     - assets/demo.jpg
-    - assets/hatch_from_meta.png
 
   fonts:
     - family: Optimistic

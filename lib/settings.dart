@@ -4,7 +4,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'settings_pages.dart';
 import 'state.dart';
 
-// ponytail: static grouped-card port of the Aura settings hub; no VM rows.
 class SettingsScreen extends StatelessWidget {
   final AppState state;
   const SettingsScreen({super.key, required this.state});
@@ -283,11 +282,7 @@ class SettingsScreen extends StatelessWidget {
                               style: TextStyle(
                                   fontSize: 15,
                                   color: Color(0xFF6F7278))),
-                          const Spacer(),
-                          Image.asset(
-                              'assets/hatch_from_meta.png',
-                              width: 96,
-                              height: 24),
+                          const Spacer()
                         ],
                       ),
                     ),
