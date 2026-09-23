@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """Reapplies all Muse bypass patches to a fresh apktool decode at /tmp/muse-patch.
 
+Replaces server/orig/apply_patches.py (identical behavior).
 P1 onboarding complete | P2 returning-activated | P3 routePending=false |
 P4 tos accepted | P5 offline queue on | P6 merge history with null session.
-Run: python3 apply_patches.py  (cwd anywhere)
+Run: python3 patcher.py  (cwd anywhere)
 """
 import re
-import sys
 
 ROOT = "/tmp/muse-patch"
 

@@ -59,7 +59,7 @@ No fixes proposed. Clock/keyboard/scroll contamination is noted, never scored.
 
 | # | Claim tested | Verdict | Evidence |
 |---|---|---|---|
-| E1 | Clone `_accounts` (u1 `Muse User`, u2 `Work Profile`) needs real APK account data | CONTRADICTED | Clone list is a stub for the offline `select_account` contract (`server/index.js`, `lib/api.dart`); the original skips account selection offline (`account_selection_required: False`), so no original account structure exists to copy |
+| E1 | Clone `_accounts` (u1 `Muse User`, u2 `Work Profile`) needs real APK account data | CONTRADICTED | Clone list is a stub for the offline `select_account` contract (`server/backend.py` fixture mode, `lib/api.dart`); the original skips account selection offline (`account_selection_required: False`), so no original account structure exists to copy |
 | E2 | Clone needs a real tab-bar mapping review | CONTRADICTED | Clone already carries copied APK vectors and black selected tint (`lib/theme.dart` `MuseTabIcons`, `lib/shell.dart` `_TabCell`); original dump confirms icon-only row plus selected states |
 | E3 | OTP field content / status-bar clocks / scroll position / keyboard visibility as parity failures | CONTRADICTED | Contamination to control, per plan; scores reuse masked pairs only |
 | E4 | Clone has no Pin screen / ToS accept path | CONTRADICTED | `lib/onboarding.dart` step 7 PIN plus `completePin`, `TosScreen` accept call exist and were driven in the funnel |

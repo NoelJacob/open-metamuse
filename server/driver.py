@@ -1,30 +1,33 @@
 #!/usr/bin/env python3
-"""Shared UI driver for BOTH Muse apps on Pixel_9 (emulator-5554).
+"""Single UI driver for BOTH Muse apps on Pixel_9 (emulator-5554).
 
+Replaces server/orig/drive2.py (superset — all scenarios kept) and
+server/orig/drive.py (legacy login/shot only; same primitives, dropped).
 Same text-anchored primitives work unchanged on either app; only the
 package and the funnel steps differ. Stateful: keeps last screenshot,
-dump cache, and per-run log under /tmp/drive2/.
+dump cache, and per-run log under /tmp/drive2/. stdlib only.
 
 Usage:
-  python3 drive2.py --app orig|ours <scenario> [args]
+  python3 driver.py --app orig|ours <scenario> [args]
 Scenarios:
   to_otp <email>     land on OTP screen (both apps)
   submit_otp <code>  type code digits via keyevents (both apps)
   shot <path>        screenshot to path
   dump               print text nodes with bounds
   tap_text <text>    wait-for + tap a text node
+  measure <k..>      dump bounds of nodes matching keys
   funnel_ours        full ours-app funnel to main chat
+  cold               cold-start the app and wait for focus
 """
 import argparse
 import os
 import re
 import subprocess
-import sys
 import time
 
 DEV = "emulator-5554"
 PKGS = {"orig": "com.facebook.aura",
-        "ours": "com.noeljacob.metamuse.openmetamuse"}
+        "ours": "com.metamuse.flutter.openmetamuse"}
 OUT = "/tmp/drive2"
 os.makedirs(OUT, exist_ok=True)
 
@@ -107,6 +110,7 @@ def tap_field(timeout=60):
         time.sleep(2)
     raise TimeoutError("no EditText found")
 
+
 def cold_start(pkg):
     adb("shell", "am", "force-stop", pkg)
     time.sleep(1)
@@ -135,7 +139,6 @@ def shot(path):
         subprocess.run(["adb", "-s", DEV, "exec-out", "screencap", "-p"],
                        stdout=f, timeout=60)
     log(f"shot {path}")
-
 
 
 def to_otp(pkg, email="test@example.com"):
