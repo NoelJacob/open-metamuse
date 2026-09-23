@@ -4,9 +4,19 @@ Terse path from cold checkout to manually explorable original on `Pixel_9` (`emu
 
 ## 0. Prerequisites
 
-- Android SDK (`adb`, `emulator`), Flutter SDK, `mitmdump`, `node`, `openssl`, `blazediff-cli`.
+- Android SDK (`adb`, `emulator`), Flutter SDK, `mitmdump`, `openssl`, `blazediff-cli`.
 - The emulator trusts the mitmproxy CA (one-time host setup, outside this doc).
 - APK under test: `muse.apk` at repo root (package `com.facebook.aura`).
+
+## Flutter clone quick loop (UI usable from `flutter run`)
+
+```sh
+python3 server/flutter-backend.py      # terminal 1: fixture mock on :8787
+flutter run -d emulator-5554           # terminal 2: debug build + hot reload
+adb -s emulator-5554 reverse tcp:8787 tcp:8787   # bridge app localhost → host
+```
+
+The app hardcodes `http://localhost:8787` (`lib/api.dart:56`); without the reverse bridge every screen fails into the offline canned fallback. First launch shows the notification gate (fresh install has no grants) — dismiss once, then landing → OTP (`123456`) → ToS → main chat all serve from the backend.
 
 ## 1. Boot the emulator
 
@@ -22,7 +32,7 @@ Boot the emulator yourself first, then:
 python3 server/backend.py orig
 ```
 
-It waits for `emulator-5554`, sets the device proxy to `10.0.2.2:8080`, silences Talkback, pre-grants every `com.facebook.aura` permission, mints the mitm-CA-signed `:9443` leaf if `/tmp/gwprobe` was wiped, and brings up mitmdump (`:8080`) plus the gateway stub (`:9443`). When it prints `OK`, launch the Muse app in the emulator and browse. Ctrl-C stops both. (The `fixture` / `gateway` / `probe` modes remain for clone work and debugging.)
+It waits for `emulator-5554`, sets the device proxy to `10.0.2.2:8080`, silences Talkback, pre-grants every `com.facebook.aura` permission, mints the mitm-CA-signed `:9443` leaf if `/tmp/gwprobe` was wiped, and brings up mitmdump (`:8080`) plus the gateway stub (`:9443`). When it prints `OK`, launch the Muse app in the emulator and browse. Ctrl-C stops both. (The `gateway` / `probe` / `intercept` modes remain for debugging; the Flutter clone is served by `python3 server/flutter-backend.py` on `:8787`.)
 
 ## 3. Wire the device
 
