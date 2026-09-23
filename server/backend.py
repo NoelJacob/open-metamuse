@@ -53,6 +53,18 @@ try:
 except OSError:
     DEMO_JPG = b"\xff\xd8\xff\xe0" + bytes(1024)
 
+
+def _data_bytes(name, default=b""):
+    try:
+        with open(os.path.join(DATA, name), "rb") as f:
+            return f.read()
+    except OSError:
+        return default
+
+
+PARIS_MD = _data_bytes("paris-weekend.md")
+PARIS_PDF = _data_bytes("paris-weekend.pdf")
+
 _TS = 1757300000000
 _uid_n = [0]
 
@@ -138,6 +150,148 @@ FEED_UNITS = [
     {"id": "f4", "kind": "news", "title": "Fresh updates",
      "subtitle": "Fresh updates for you"},
 ]
+def _idea_card(cid, title, summary, detail=""):
+    return {
+        "id": cid,
+        "buildStatus": "ready",
+        "build_status": "ready",
+        "iconUrl": "",
+        "mimeType": "image/jpeg",
+        "primaryLabel": "Try it",
+        "secondaryLabel": "",
+        "content": {
+            "title": title,
+            "summary": summary,
+            "detailDescription": detail,
+            "buildSummary": summary,
+            "fitReason": "",
+        },
+    }
+
+
+def _idea_cards_body():
+    # ponytail: HatchEnvelope.ok + result per IdeaCardsResponseJson —
+    # field names from the decompiled explore/repo contracts.
+    return {
+        "ok": True,
+        "result": {
+            "sections": [
+                {"id": "s-morning",
+                 "title": "Good morning",
+                 "subtitle": "Things to try today",
+                 "presentation": {"layout": "carousel"},
+                 "cards": [
+                     _idea_card("c1", "Plan my weekend",
+                                "A 2-day Paris itinerary",
+                                "Louvre, Seine cruise, Montmartre."),
+                     _idea_card("c2", "Weekend getaway",
+                                "Don't forget your plans",
+                                "Pack list and reservations."),
+                 ]},
+                {"id": "s-learn",
+                 "title": "Learn something new",
+                 "subtitle": "Ideas for you",
+                 "presentation": {"layout": "grid"},
+                 "cards": [
+                     _idea_card("c3", "Try voice chat",
+                                "Ask me anything",
+                                "Hands-free conversation."),
+                     _idea_card("c4", "Fresh updates",
+                                "Fresh updates for you",
+                                "What changed this week."),
+                 ]},
+            ],
+            "pagination": {"hasNextPage": False, "nextCursor": ""},
+            "viewerState": {"hasBuiltIdea": False},
+        },
+    }
+
+
+def _artifact_node(ref, name, source, updated_ms, preview_icon="",
+                     kind="document"):
+    # ponytail: shapes per ArtifactNodeJson/ArtifactCapabilitiesJson; the
+    # Media segment filters the same artifacts payload client-side.
+    return {
+        "artifact_ref": ref,
+        "display_name": name,
+        "source": source,
+        "created_at_ms": 1757300000000,
+        "updated_at_ms": updated_ms,
+        "last_activity_at_ms": updated_ms,
+        "last_opened_at_ms": None,
+        "is_pinned": False,
+        "open_target": None,
+        "preview": {"icon_url": preview_icon} if preview_icon else None,
+        "capabilities": {"can_delete": True, "can_open": True,
+                         "can_pin": True, "can_rename": True,
+                         "can_share": True},
+        "kind": kind,
+    }
+
+
+def _artifacts_body():
+    # ponytail: HatchEnvelope.ok + result per UnifiedArtifactsResponseJson
+    # (edges[{cursor,node}] + page_info); demo rows for docs + media.
+    nodes = [
+        _artifact_node("doc:weekend-plan", "Weekend plan",
+                       "file", 1757300400000, kind="document"),
+        _artifact_node("doc:sourdough-guide", "Sourdough guide",
+                       "file", 1757290000000, kind="document"),
+        _artifact_node("workspace/user/files/demo_0_ab12.jpg", "demo.jpg",
+                       "file", 1757300600000, kind="image"),
+        _artifact_node("workspace/user/files/paris-map.jpg", "paris-map.jpg",
+                       "file", 1757295000000, kind="image"),
+        _artifact_node("doc:paris-weekend.md", "paris-weekend.md",
+                       "file", 1757296000000, kind="document"),
+        _artifact_node("doc:paris-weekend.pdf", "paris-weekend.pdf",
+                       "file", 1757297000000, kind="document"),
+    ]
+    return {
+        "ok": True,
+        "result": {
+            "edges": [{"cursor": f"cur{i}", "node": n}
+                      for i, n in enumerate(nodes)],
+            "page_info": {"end_cursor": "", "has_next_page": False,
+                          "has_previous_page": False, "start_cursor": ""},
+        },
+    }
+
+
+def _demo_size(path):
+    # ponytail: single source of truth for demo file sizes (fs/stat +
+    # fs/library agree, or the viewer distrusts both).
+    p = str(path)
+    if "paris-weekend.pdf" in p:
+        return len(PARIS_PDF)
+    if "paris-weekend.md" in p:
+        return len(PARIS_MD)
+    if "paris-map" in p:
+        return 48210
+    if "demo" in p:
+        return len(DEMO_JPG)
+    return 0
+
+
+def _fs_library_body():
+    # ponytail: shared by the gateway and mitm transports (the app sends
+    # fs/library both direct and proxied).
+    entries = [
+        {"modified_ms": 1757300600000, "name": "demo.jpg",
+         "path": "workspace/user/files/demo_0_ab12.jpg",
+         "size": len(DEMO_JPG)},
+        {"modified_ms": 1757295000000, "name": "paris-map.jpg",
+         "path": "workspace/user/files/paris-map.jpg", "size": 48210},
+        {"modified_ms": 1757296000000, "name": "paris-weekend.md",
+         "path": "workspace/user/files/paris-weekend.md",
+         "size": len(PARIS_MD)},
+        {"modified_ms": 1757297000000, "name": "paris-weekend.pdf",
+         "path": "workspace/user/files/paris-weekend.pdf",
+         "size": len(PARIS_PDF)},
+    ]
+    return {"ok": True, "result": {"entries": entries,
+                                   "has_more": False, "total": 4}}
+
+
 GOALS = [
     {"id": "g1", "title": "Plan weekend trip",
      "status": "active", "progress": 0.4},
@@ -314,7 +468,7 @@ def run_fixture(port=8787):
 
 
 # ------------------------------------------------------------------ gateway
-def _gateway_route(method, path, query_raw, body_bytes):
+def _gateway_route(method, path, query_raw, body_bytes=b""):
     """Shared route table for the direct-TLS :9443 stub (was gwhttps.py).
 
     Behavior preserved exactly, including chat/history returning a
@@ -337,11 +491,38 @@ def _gateway_route(method, path, query_raw, body_bytes):
                 "has_unread_threads": False}
     if p.endswith("/api/feed/units"):
         return {"result": {"units": FEED_UNITS}, "units": FEED_UNITS}
+    if "/api/idea-cards" in p:
+        print("STUB idea-cards", flush=True)
+        return _idea_cards_body()
     if p.endswith("/api/goals/list"):
         return {"result": {"goals": GOALS}, "goals": GOALS}
     if p.endswith("/api/library/artifacts"):
         items = [{"id": "a1", "title": "Weekend plan", "kind": "document"}]
         return {"result": {"items": items}, "items": items}
+    if "/api/artifacts" in p:
+        print("STUB artifacts", flush=True)
+        return _artifacts_body()
+    if p.endswith("/fs/library"):
+        print("STUB fs-library", flush=True)
+        return _fs_library_body()
+    if p.endswith("/fs/stat"):
+        try:
+            _sp = json.loads(
+                body_bytes.decode("utf-8", "replace") or "{}").get(
+                "path", "")
+        except Exception:
+            _sp = ""
+        print(f"STUB fs-stat path={_sp}", flush=True)
+        return {"ok": True, "result": {
+            "kind": "file", "modified_ms": 1757300000000,
+            "path": _sp, "size": _demo_size(_sp)}}
+    if p.endswith("/fs/read"):
+        import base64 as _b64
+        _rp, _off, _ln = "", 0, 0
+        print("STUB fs-read (gateway: path unseen, serving PDF)", flush=True)
+        _slice = PARIS_PDF[_off:_off + _ln] if _ln else PARIS_PDF[_off:]
+        return {"ok": True, "result": {
+            "data_base64": _b64.b64encode(_slice).decode(), "text": ""}}
     if p.endswith("/api/library/media"):
         items = [{"id": "d1", "kind": "image", "label": "demo.jpg",
                   "path": "workspace/user/files/demo_0_ab12.jpg"}]
@@ -363,6 +544,13 @@ def _gateway_route(method, path, query_raw, body_bytes):
                 "path": "workspace/user/files/demo_0_ab12.jpg",
                 "bytes_written": len(DEMO_JPG)}
     if "/fs/thumbnail/" in p or "/fs/raw/" in p:
+        # ponytail: serve demo bytes by filename; unknown names fall back
+        # to the demo JPG so thumbnails never 404 offline.
+        if "paris-weekend.pdf" in p:
+            return ("__bytes__", PARIS_PDF, "application/pdf")
+        if "paris-weekend.md" in p:
+            return ("__bytes__", PARIS_MD, "text/markdown")
+
         return ("__bytes__", DEMO_JPG, "image/jpeg")
     if p.endswith("/seen") or "/seen" in p:
         return {"ok": True}
@@ -370,7 +558,16 @@ def _gateway_route(method, path, query_raw, body_bytes):
 
 
 class _GatewayHandler(BaseHTTPRequestHandler):
-    protocol_version = "HTTP/1.1"
+    # ponytail: HTTP/1.0 + close — the client races keep-alive reuse
+    # (POST bodies die as "client disconnected" on reused sockets).
+    protocol_version = "HTTP/1.0"
+
+    def handle_expect_100(self):
+        # ponytail: the client posts bodies with Expect: 100-continue and
+        # RSTs when we stay silent; answer Continue immediately.
+        self.send_response_only(100)
+        self.end_headers()
+        return True
 
     def log_message(self, *a):
         pass
@@ -381,8 +578,10 @@ class _GatewayHandler(BaseHTTPRequestHandler):
         except ValueError:
             length = 0
         if length:
-            self.rfile.read(length)
-        out = _gateway_route(self.command, self.path, "", b"")
+            body = self.rfile.read(length)
+        else:
+            body = b""
+        out = _gateway_route(self.command, self.path, "", body)
         if isinstance(out, tuple):
             _, data, ctype = out
             self.send_response(200)
@@ -516,8 +715,18 @@ def _mitm_routes():
                       "bytes_written": len(DEMO_JPG)})
             return
         if "/fs/thumbnail/" in path or "/fs/raw/" in path:
-            log(flow, "STUB fs-bytes")
-            byts(flow, DEMO_JPG)
+            # ponytail: same filename dispatch as the gateway branch —
+            # serving JPG bytes for a .pdf row breaks the renderer.
+            if "paris-weekend.pdf" in path:
+                log(flow, "STUB fs-bytes pdf")
+                byts(flow, PARIS_PDF, "application/pdf")
+            elif "paris-weekend.md" in path:
+                log(flow, "STUB fs-bytes md")
+                byts(flow, PARIS_MD, "text/markdown")
+
+            else:
+                log(flow, "STUB fs-bytes")
+                byts(flow, DEMO_JPG)
             return
         if path.endswith("/api/chat/unread-count"):
             log(flow, "STUB jarvis-unread")
@@ -527,6 +736,10 @@ def _mitm_routes():
         if path.endswith("/api/feed/units"):
             log(flow, "STUB feed-units")
             js(flow, {"result": {"units": FEED_UNITS}, "units": FEED_UNITS})
+            return
+        if "/api/idea-cards" in path:
+            log(flow, "STUB idea-cards")
+            js(flow, _idea_cards_body())
             return
         if path.endswith("/api/goals/list"):
             log(flow, "STUB goals-list")
@@ -545,6 +758,51 @@ def _mitm_routes():
             items = [{"id": "a1", "title": "Weekend plan",
                       "kind": "document"}]
             js(flow, {"result": {"items": items}, "items": items})
+            return
+        if path.endswith("/fs/library"):
+            log(flow, "STUB fs-library")
+            js(flow, _fs_library_body())
+            return
+        if path.endswith("/fs/stat"):
+            try:
+                _sp = json.loads(
+                    flow.request.content.decode("utf-8", "replace")
+                    or "{}").get("path", "")
+            except Exception:
+                _sp = ""
+            log(flow, f"STUB fs-stat path={_sp}")
+            js(flow, {"ok": True, "result": {
+                "kind": "file", "modified_ms": 1757300000000,
+                "path": _sp, "size": _demo_size(_sp)}})
+            return
+        if "/api/artifacts" in path:
+            log(flow, "STUB artifacts")
+            js(flow, _artifacts_body())
+            return
+        if path.endswith("/fs/read"):
+            import base64 as _b64
+            try:
+                _body = json.loads(
+                    flow.request.content.decode("utf-8", "replace") or "{}")
+            except Exception:
+                _body = {}
+            _rp = str(_body.get("path", ""))
+            _off = int(_body.get("offset", 0) or 0)
+            _ln = int(_body.get("len", 0) or 0)
+            log(flow, f"STUB fs-read path={_rp} off={_off} len={_ln}")
+            if "paris-weekend.pdf" in _rp:
+                _data, _mime = PARIS_PDF, "application/pdf"
+            elif "paris-weekend.md" in _rp:
+                _data, _mime = PARIS_MD, "text/markdown"
+            elif "paris-map" in _rp or "demo" in _rp:
+                _data, _mime = DEMO_JPG, "image/jpeg"
+            else:
+                _data, _mime = b"", "application/octet-stream"
+            _slice = _data[_off:_off + _ln] if _ln else _data[_off:]
+            js(flow, {"ok": True, "result": {
+                "data_base64": _b64.b64encode(_slice).decode(),
+                "text": "",
+            }})
             return
         if path.endswith("/api/library/media"):
             log(flow, "STUB library-media")
