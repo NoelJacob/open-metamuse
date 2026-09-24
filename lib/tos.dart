@@ -63,17 +63,23 @@ class _TosScreenState extends State<TosScreen> {
                       children: [
                         const SizedBox(height: 64),
                         Center(
-                          child: SvgPicture.asset('assets/icons/muse_logo.svg',
-                              width: 76, height: 76),
+                          child: SvgPicture.asset(
+                            'assets/icons/muse_logo.svg',
+                            width: 76,
+                            height: 76,
+                          ),
                         ),
                         const SizedBox(height: 24),
-                        const Text('Before you get started',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                fontSize: 30,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.black,
-                                height: 1.1)),
+                        const Text(
+                          'Before you get started',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.black,
+                            height: 1.1,
+                          ),
+                        ),
                         const SizedBox(height: 28),
                         for (final (icon, title, body) in _rows) ...[
                           Row(
@@ -83,20 +89,25 @@ class _TosScreenState extends State<TosScreen> {
                               const SizedBox(width: 16),
                               Expanded(
                                 child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(title,
-                                        style: const TextStyle(
-                                            fontSize: 17,
-                                            fontWeight: FontWeight.w700,
-                                            color: Colors.black)),
+                                    Text(
+                                      title,
+                                      style: const TextStyle(
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.black,
+                                      ),
+                                    ),
                                     const SizedBox(height: 4),
-                                    Text(body,
-                                        style: const TextStyle(
-                                            fontSize: 15,
-                                            color: Color(0xFF6F7278),
-                                            height: 1.35)),
+                                    Text(
+                                      body,
+                                      style: const TextStyle(
+                                        fontSize: 15,
+                                        color: Color(0xFF6F7278),
+                                        height: 1.35,
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -113,26 +124,30 @@ class _TosScreenState extends State<TosScreen> {
                   child: RichText(
                     text: const TextSpan(
                       style: TextStyle(
-                          fontSize: 13,
-                          color: Color(0xFF6F7278),
-                          height: 1.4),
+                        fontSize: 13,
+                        color: Color(0xFF6F7278),
+                        height: 1.4,
+                      ),
                       children: [
                         TextSpan(
-                            text:
-                                'By using this product, you agree to the '),
+                          text: 'By using this product, you agree to the ',
+                        ),
                         TextSpan(
-                            text: 'Muse Terms',
-                            style: TextStyle(color: Color(0xFF0064E0))),
+                          text: 'Muse Terms',
+                          style: TextStyle(color: Color(0xFF0064E0)),
+                        ),
                         TextSpan(
-                            text:
-                                ', which contains important information about your rights and responsibilities. Muse is subject to '),
+                          text: ', which contains important information about your rights and responsibilities. Muse is subject to ',
+                        ),
                         TextSpan(
-                            text: "Meta's AI Terms",
-                            style: TextStyle(color: Color(0xFF0064E0))),
+                          text: "Meta's AI Terms",
+                          style: TextStyle(color: Color(0xFF0064E0)),
+                        ),
                         TextSpan(text: ' and the '),
                         TextSpan(
-                            text: 'Meta Privacy Policy',
-                            style: TextStyle(color: Color(0xFF0064E0))),
+                          text: 'Meta Privacy Policy',
+                          style: TextStyle(color: Color(0xFF0064E0)),
+                        ),
                         TextSpan(text: '.'),
                       ],
                     ),
@@ -155,12 +170,18 @@ class _TosScreenState extends State<TosScreen> {
                               width: 24,
                               height: 24,
                               child: CircularProgressIndicator(
-                                  strokeWidth: 2, color: Colors.white))
-                          : const Text('Continue',
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text(
+                              'Continue',
                               style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white)),
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
                     ),
                   ),
                 ),
@@ -171,9 +192,11 @@ class _TosScreenState extends State<TosScreen> {
               top: 8,
               right: 16,
               child: InkWell(
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                    builder: (_) =>
-                        SettingsScreen(state: widget.state))),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => SettingsScreen(state: widget.state),
+                  ),
+                ),
                 customBorder: const CircleBorder(),
                 child: Container(
                   width: 48,
@@ -181,11 +204,16 @@ class _TosScreenState extends State<TosScreen> {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                        color: const Color(0xFFE2E3E8), width: 1.5),
+                      color: const Color(0xFFE2E3E8),
+                      width: 1.5,
+                    ),
                   ),
                   child: Center(
-                    child: SvgPicture.asset('assets/icons/muse_gear.svg',
-                        width: 24, height: 24),
+                    child: SvgPicture.asset(
+                      'assets/icons/muse_gear.svg',
+                      width: 24,
+                      height: 24,
+                    ),
                   ),
                 ),
               ),

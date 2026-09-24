@@ -13,17 +13,19 @@ class TasksScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Tasks')),
-      floatingActionButton: Builder(builder: (fab) {
-        return FloatingActionButton(
-          tooltip: 'New goal',
-          onPressed: () => showModalBottomSheet(
-            context: fab,
-            isScrollControlled: true,
-            builder: (_) => _GoalSheet(state: state),
-          ),
-          child: const Icon(Icons.add),
-        );
-      }),
+      floatingActionButton: Builder(
+        builder: (fab) {
+          return FloatingActionButton(
+            tooltip: 'New goal',
+            onPressed: () => showModalBottomSheet(
+              context: fab,
+              isScrollControlled: true,
+              builder: (_) => _GoalSheet(state: state),
+            ),
+            child: const Icon(Icons.add),
+          );
+        },
+      ),
       body: ListenableBuilder(
         listenable: state,
         builder: (context, _) {
@@ -31,8 +33,10 @@ class TasksScreen extends StatelessWidget {
             return const Center(
               child: Padding(
                 padding: EdgeInsets.all(32),
-                child: Text('No tasks yet',
-                    style: TextStyle(fontSize: 16, color: Color(0xFF6F7278))),
+                child: Text(
+                  'No tasks yet',
+                  style: TextStyle(fontSize: 16, color: Color(0xFF6F7278)),
+                ),
               ),
             );
           }
@@ -67,16 +71,19 @@ class _LibraryScreenState extends State<LibraryScreen> {
       return Scaffold(
         appBar: AppBar(
           leading: IconButton(
-              tooltip: 'Back',
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => setState(() => _sysFiles = false)),
+            tooltip: 'Back',
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => setState(() => _sysFiles = false),
+          ),
           title: const Text('System Files'),
         ),
         body: const Center(
           child: Padding(
             padding: EdgeInsets.all(32),
-            child: Text('No system files',
-                style: TextStyle(fontSize: 16, color: Color(0xFF6F7278))),
+            child: Text(
+              'No system files',
+              style: TextStyle(fontSize: 16, color: Color(0xFF6F7278)),
+            ),
           ),
         ),
       );
@@ -106,8 +113,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                 ButtonSegment(value: 1, label: Text('Media')),
               ],
               selected: {_seg},
-              onSelectionChanged: (s) =>
-                  setState(() => _seg = s.first),
+              onSelectionChanged: (s) => setState(() => _seg = s.first),
             ),
           ),
           Expanded(
@@ -115,12 +121,15 @@ class _LibraryScreenState extends State<LibraryScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(32),
                 child: Text(
-                    _seg == 0
-                        ? 'Nothing created yet\nWhen you create something like a document, it will appear here.'
-                        : 'No Media yet\nWhen you capture photos or videos, they will appear here.',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                        fontSize: 16, color: Color(0xFF6F7278))),
+                  _seg == 0
+                      ? 'Nothing created yet\nWhen you create something like a document, it will appear here.'
+                      : 'No Media yet\nWhen you capture photos or videos, they will appear here.',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Color(0xFF6F7278),
+                  ),
+                ),
               ),
             ),
           ),
@@ -152,22 +161,28 @@ class _GoalSheetState extends State<_GoalSheet> {
     return SafeArea(
       child: SingleChildScrollView(
         padding: EdgeInsets.fromLTRB(
-            24, 16, 24, 24 + MediaQuery.of(context).viewInsets.bottom),
+          24,
+          16,
+          24,
+          24 + MediaQuery.of(context).viewInsets.bottom,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('New goal',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    fontSize: 20, fontWeight: FontWeight.w700)),
+            const Text(
+              'New goal',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+            ),
             const SizedBox(height: 8),
             TextField(
               controller: _title,
               autofocus: true,
               decoration: const InputDecoration(
-                  hintText: 'What do you want to achieve?',
-                  border: OutlineInputBorder()),
+                hintText: 'What do you want to achieve?',
+                border: OutlineInputBorder(),
+              ),
             ),
             const SizedBox(height: 16),
             SizedBox(
@@ -181,11 +196,14 @@ class _GoalSheetState extends State<_GoalSheet> {
                   shape: const StadiumBorder(),
                   backgroundColor: const Color(0xFF0064E0),
                 ),
-                child: const Text('Create goal',
-                    style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white)),
+                child: const Text(
+                  'Create goal',
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
           ],

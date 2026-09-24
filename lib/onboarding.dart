@@ -83,39 +83,49 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                 children: [
                   const SizedBox(height: 48),
                   Center(
-                    child: SvgPicture.asset('assets/icons/muse_logo.svg',
-                        width: 84, height: 84),
+                    child: SvgPicture.asset(
+                      'assets/icons/muse_logo.svg',
+                      width: 84,
+                      height: 84,
+                    ),
                   ),
                   const SizedBox(height: 28),
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 8),
-                    child: Text('Welcome to Muse',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            fontSize: 34,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.black,
-                            height: 1.02)),
+                    child: Text(
+                      'Welcome to Muse',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 34,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black,
+                        height: 1.02,
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 24),
                   TextField(
                     controller: _phone,
                     keyboardType: TextInputType.emailAddress,
                     onChanged: (_) => setState(() {}),
-                    style:
-                        const TextStyle(fontSize: 17, color: Colors.black),
+                    style: const TextStyle(fontSize: 17, color: Colors.black),
                     decoration: InputDecoration(
                       isDense: true,
                       hintText: 'Mobile number or email',
                       hintStyle: const TextStyle(
-                          fontSize: 17, color: Color(0xFF9AA0A6)),
+                        fontSize: 17,
+                        color: Color(0xFF9AA0A6),
+                      ),
                       filled: true,
                       fillColor: const Color(0xFFF0F1F5),
                       contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 14),
+                        horizontal: 20,
+                        vertical: 14,
+                      ),
                       border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(31),
-                          borderSide: BorderSide.none),
+                        borderRadius: BorderRadius.circular(31),
+                        borderSide: BorderSide.none,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -132,9 +142,9 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                     child: FilledButton(
                       onPressed: ready && !_busy
                           ? () => _run(() async {
-                                await _s.startPhone(_phone.text.trim());
-                                setState(() => _step = 2);
-                              })
+                              await _s.startPhone(_phone.text.trim());
+                              setState(() => _step = 2);
+                            })
                           : null,
                       style: FilledButton.styleFrom(
                         shape: const StadiumBorder(),
@@ -146,19 +156,26 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                               width: 22,
                               height: 22,
                               child: CircularProgressIndicator(
-                                  strokeWidth: 2, color: Colors.white))
-                          : const Text('Continue',
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text(
+                              'Continue',
                               style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white)),
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
                     ),
                   ),
                   if (_error != null) ...[
                     const SizedBox(height: 12),
-                    Text(_error!,
-                        style:
-                            const TextStyle(color: Colors.red, fontSize: 13)),
+                    Text(
+                      _error!,
+                      style: const TextStyle(color: Colors.red, fontSize: 13),
+                    ),
                   ],
                 ],
               ),
@@ -174,12 +191,17 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                   height: 48,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border:
-                        Border.all(color: const Color(0xFFE2E3E8), width: 1.5),
+                    border: Border.all(
+                      color: const Color(0xFFE2E3E8),
+                      width: 1.5,
+                    ),
                   ),
                   child: Center(
-                    child: SvgPicture.asset('assets/icons/muse_gear.svg',
-                        width: 24, height: 24),
+                    child: SvgPicture.asset(
+                      'assets/icons/muse_gear.svg',
+                      width: 24,
+                      height: 24,
+                    ),
                   ),
                 ),
               ),
@@ -191,8 +213,8 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   }
 
   void _loggedOutSettings() {
-    Navigator.of(context).push(MaterialPageRoute(
-        builder: (_) => SettingsScreen(state: _s)));
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => SettingsScreen(state: _s)));
   }
 
   Widget _body() {
@@ -200,10 +222,13 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       case 1:
         return _frame('Enter your phone number', [
           TextField(
-              controller: _phone,
-              keyboardType: TextInputType.phone,
-              decoration:
-                  const InputDecoration(labelText: 'Phone', hintText: '+1…')),
+            controller: _phone,
+            keyboardType: TextInputType.phone,
+            decoration: const InputDecoration(
+              labelText: 'Phone',
+              hintText: '+1…',
+            ),
+          ),
           _go('Send code', () async {
             await _s.startPhone(_phone.text.trim());
             setState(() => _step = 2);
@@ -261,7 +286,9 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                          color: const Color(0xFFE2E3E8), width: 1.5),
+                        color: const Color(0xFFE2E3E8),
+                        width: 1.5,
+                      ),
                     ),
                     child: const Icon(Icons.arrow_back, size: 22),
                   ),
@@ -269,22 +296,29 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
               ),
               const SizedBox(height: 8),
               Center(
-                child: SvgPicture.asset('assets/icons/muse_logo.svg',
-                    width: 64,
-                    height: 64,
-                    colorFilter: const ColorFilter.mode(
-                        Color(0xFF0064E0), BlendMode.srcIn)),
+                child: SvgPicture.asset(
+                  'assets/icons/muse_logo.svg',
+                  width: 64,
+                  height: 64,
+                  colorFilter: const ColorFilter.mode(
+                    Color(0xFF0064E0),
+                    BlendMode.srcIn,
+                  ),
+                ),
               ),
               const SizedBox(height: 20),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 8),
-                child: Text('Enter your code',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.black,
-                        height: 1.1)),
+                child: Text(
+                  'Enter your code',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.black,
+                    height: 1.1,
+                  ),
+                ),
               ),
               const SizedBox(height: 12),
               Padding(
@@ -293,20 +327,21 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                   textAlign: TextAlign.center,
                   text: TextSpan(
                     style: const TextStyle(
-                        fontSize: 15,
-                        color: Color(0xFF6F7278),
-                        height: 1.35),
+                      fontSize: 15,
+                      color: Color(0xFF6F7278),
+                      height: 1.35,
+                    ),
                     children: [
                       TextSpan(
-                          text:
-                              'To confirm your account, enter the 6-digit code we sent to $id. You may need to check your spam or social mail folder. '),
+                        text:
+                            'To confirm your account, enter the 6-digit code we sent to $id. You may need to check your spam or social mail folder. ',
+                      ),
                       TextSpan(
                         text: 'Resend code',
-                        style:
-                            const TextStyle(color: Color(0xFF0064E0)),
+                        style: const TextStyle(color: Color(0xFF0064E0)),
                         recognizer: TapGestureRecognizer()
-                          ..onTap = () => _run(
-                              () => _s.startPhone(_phone.text.trim())),
+                          ..onTap = () =>
+                              _run(() => _s.startPhone(_phone.text.trim())),
                       ),
                     ],
                   ),
@@ -352,12 +387,18 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                             width: 22,
                             height: 22,
                             child: CircularProgressIndicator(
-                                strokeWidth: 2, color: Colors.white))
-                        : const Text('Confirm',
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text(
+                            'Confirm',
                             style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white)),
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
                   ),
                 ),
               ),
@@ -365,9 +406,13 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
               if (_error != null) ...[
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Text(_error!,
-                      style: const TextStyle(
-                          color: Color(0xFFD93025), fontSize: 13)),
+                  child: Text(
+                    _error!,
+                    style: const TextStyle(
+                      color: Color(0xFFD93025),
+                      fontSize: 13,
+                    ),
+                  ),
                 ),
               ],
             ],
@@ -392,10 +437,10 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   }
 
   Widget _go(String label, Future<void> Function() fn) {
-    return FilledButton(
-        onPressed: () => _run(fn), child: Text(label));
+    return FilledButton(onPressed: () => _run(fn), child: Text(label));
   }
 }
+
 class _SmsNotice extends StatelessWidget {
   const _SmsNotice();
 
@@ -404,11 +449,14 @@ class _SmsNotice extends StatelessWidget {
     return RichText(
       text: TextSpan(
         style: const TextStyle(
-            fontSize: 13, color: Color(0xFF6F7278), height: 1.2),
+          fontSize: 13,
+          color: Color(0xFF6F7278),
+          height: 1.2,
+        ),
         children: [
           const TextSpan(
-              text:
-                  'You may receive SMS notifications from us by using your mobile number. '),
+            text: 'You may receive SMS notifications from us by using your mobile number. ',
+          ),
           const TextSpan(
             text: 'Learn more',
             style: TextStyle(color: Color(0xFF0064E0)),
@@ -430,8 +478,7 @@ class _OtpBoxes extends StatefulWidget {
 
 class _OtpBoxesState extends State<_OtpBoxes> {
   final _nodes = List.generate(6, (_) => FocusNode());
-  final _ctls =
-      List.generate(6, (_) => TextEditingController());
+  final _ctls = List.generate(6, (_) => TextEditingController());
 
   @override
   void dispose() {
@@ -482,21 +529,26 @@ class _OtpBoxesState extends State<_OtpBoxes> {
                 keyboardType: TextInputType.number,
                 maxLength: 6,
                 style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black),
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
+                ),
                 decoration: InputDecoration(
                   counterText: '',
                   filled: true,
                   fillColor: const Color(0xFFF0F1F5),
                   contentPadding: EdgeInsets.zero,
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide.none),
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
                   focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(
-                          color: Color(0xFF0064E0), width: 2)),
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(
+                      color: Color(0xFF0064E0),
+                      width: 2,
+                    ),
+                  ),
                 ),
                 onChanged: (v) => _changed(i, v),
               ),
@@ -508,4 +560,3 @@ class _OtpBoxesState extends State<_OtpBoxes> {
     );
   }
 }
-

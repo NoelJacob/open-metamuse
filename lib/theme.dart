@@ -6,45 +6,45 @@ import 'package:flutter_svg/flutter_svg.dart';
 const museBlue = Color(0xFF0064E0);
 const museUserBubble = Color(0xFF000000);
 const museAgentBubble = Color(0xFFE9EAED);
-const museChatBackground = Color(0xFFF6F7F8);
 const musePrimaryText = Color(0xFF232937);
 
 ThemeData museLightTheme() => ThemeData(
-      useMaterial3: true,
-      fontFamily: 'Optimistic',
-      colorScheme: const ColorScheme.light(
-        primary: museBlue,
-        onPrimary: Colors.white,
-        surface: Colors.white,
-        onSurface: musePrimaryText,
-      ),
-      scaffoldBackgroundColor: museChatBackground,
-    );
+  useMaterial3: true,
+  fontFamily: 'Optimistic',
+  colorScheme: ColorScheme.fromSeed(
+    seedColor: museBlue,
+    brightness: Brightness.light,
+  ),
+  scaffoldBackgroundColor: Color(0xFFF6F7F8),
+);
 
 ThemeData museDarkTheme() => ThemeData(
-      useMaterial3: true,
-      fontFamily: 'Optimistic',
-      colorScheme: ColorScheme.fromSeed(
-          seedColor: museBlue, brightness: Brightness.dark),
-      scaffoldBackgroundColor: const Color(0xFF1A1A1A),
-    );
+  useMaterial3: true,
+  fontFamily: 'Optimistic',
+  colorScheme: ColorScheme.fromSeed(
+    seedColor: museBlue,
+    brightness: Brightness.dark,
+  ),
+  scaffoldBackgroundColor: const Color(0xFF1A1A1A),
+);
 
 /// Muse tab vectors converted from the original APK (aura_tab_*_24.xml).
 class MuseTabIcons {
   static Widget _asset(String name, {double size = 24, Color? color}) =>
-      SvgPicture.asset('assets/icons/$name.svg',
-          width: size,
-          height: size,
-          colorFilter: color == null
-              ? null
-              : ColorFilter.mode(color, BlendMode.srcIn));
+      SvgPicture.asset(
+        'assets/icons/$name.svg',
+        width: size,
+        height: size,
+        colorFilter: color == null
+            ? null
+            : ColorFilter.mode(color, BlendMode.srcIn),
+      );
 
   static Widget chatFilled({double size = 24, Color? color}) =>
       _asset('muse_chat_filled', size: size, color: color);
 
   static Widget chatOutline({double size = 24, Color? color}) =>
       _asset('muse_chat_outline', size: size, color: color);
-
 
   static Widget bulb({double size = 24, Color? color}) =>
       _asset('muse_bulb', size: size, color: color);

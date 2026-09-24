@@ -18,7 +18,6 @@ class ChatScreen extends StatelessWidget {
   }
 }
 
-
 class _ChatBody extends StatelessWidget {
   final AppState state;
   const _ChatBody({required this.state});
@@ -29,151 +28,175 @@ class _ChatBody extends StatelessWidget {
       listenable: state,
       builder: (context, _) {
         return Scaffold(
-        // ponytail: measured chrome — 60dp menu circle; main centers avatar
-        // block, threads use title row (orig-13 vs thread dumps).
-        appBar: PreferredSize(
-          // ponytail: fixed 116dp chrome + status bar via SafeArea.
-          preferredSize: const Size.fromHeight(159),
-          child: SafeArea(
-            bottom: false,
-            child: state.currentThreadId == null
-                ? Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(height: 22),
-                      Container(
-                        width: 48,
-                        height: 48,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFE5E6E8),
-                          shape: BoxShape.circle,
+          // ponytail: measured chrome — 60dp menu circle; main centers avatar
+          // block, threads use title row (orig-13 vs thread dumps).
+          appBar: PreferredSize(
+            // ponytail: fixed 116dp chrome + status bar via SafeArea.
+            preferredSize: const Size.fromHeight(159),
+            child: SafeArea(
+              bottom: false,
+              child: state.currentThreadId == null
+                  ? Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox(height: 22),
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFE5E6E8),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        const Text(
+                          'Muse',
+                          style: TextStyle(
+                            fontSize: 19,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    )
+                  : Padding(
+                      padding: EdgeInsets.only(top: 8, left: 16, right: 16),
+                      child: SizedBox(
+                        height: 100,
+                        child: Builder(
+                          builder: (scaffoldCtx) {
+                            return Row(
+                              children: [
+                                InkWell(
+                                  onTap: () =>
+                                      Scaffold.of(scaffoldCtx).openDrawer(),
+                                  customBorder: const CircleBorder(),
+                                  child: Container(
+                                    width: 60,
+                                    height: 60,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: const Color(0xFFE2E3E8),
+                                        width: 1.5,
+                                      ),
+                                    ),
+                                    child: const Icon(Icons.menu, size: 24),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        state.currentTitle,
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          fontSize: 19,
+                                          height: 1.0,
+                                          fontWeight: FontWeight.w700,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFF0F1F5),
+                                          borderRadius: BorderRadius.circular(
+                                            500,
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          'Active now',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: Color(0xFF6F7278),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 24),
+                              ],
+                            );
+                          },
                         ),
                       ),
-                      const SizedBox(height: 6),
-                      const Text('Muse',
-                          style: TextStyle(
-                              fontSize: 19,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.black)),
-                    ],
-                  )
-                : Padding(
-                    padding: EdgeInsets.only(
-                        top: 8, left: 16, right: 16),
-                    child: SizedBox(
-                      height: 100,
-                      child: Builder(builder: (scaffoldCtx) {
-                        return Row(
-                          children: [
-                            InkWell(
-                              onTap: () => Scaffold.of(scaffoldCtx)
-                                  .openDrawer(),
-                            customBorder: const CircleBorder(),
-                            child: Container(
-                              width: 60,
-                              height: 60,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                    color: const Color(0xFFE2E3E8),
-                                    width: 1.5),
-                              ),
-                              child: const Icon(Icons.menu, size: 24),
-                            ),
-                          ),
-                          Expanded(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(state.currentTitle,
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                        fontSize: 19,
-                                        height: 1.0,
-                                        fontWeight: FontWeight.w700,
-                                        color: Colors.black)),
-                                const SizedBox(height: 4),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFF0F1F5),
-                                    borderRadius:
-                                        BorderRadius.circular(500),
-                                  ),
-                                  child: const Text('Active now',
-                                      style: TextStyle(
-                                          fontSize: 13,
-                                          color: Color(0xFF6F7278))),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 24),
-                          ],
-                        );
-                      }),
-                    ),
-                  ),
-          ),
-        ),
-        drawer: _ThreadDrawer(state: state),
-        body: Column(
-          children: [
-            Expanded(
-              child: state.currentMessages.isEmpty
-                  ? const Center(
-                      child: Text('Start a conversation with Muse'))
-                  : AutoScrollList(
-                      // ponytail: top inset aligns row 1 with the original (559px).
-                      padding: const EdgeInsets.only(
-                          top: 20, left: 16, right: 16, bottom: 12),
-                      itemCount: state.currentMessages.length,
-                      itemBuilder: (context, i) {
-                        final msg = state.currentMessages[i];
-                        // ponytail: original shows one full-width date
-                        // divider, not per-message stamps.
-                        if (i == 0) {
-                          return Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.stretch,
-                            children: [
-                              const Text('SEP 8, 8:23 AM',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      fontSize: 13,
-                                      color: Color(0xFF6F7278))),
-                              const SizedBox(height: 10),
-                              _Bubble(
-                                  msg: msg,
-                                  baseUrl: state.api.baseUrl,
-                                  showReply: true),
-                            ],
-                          );
-                        }
-                        // ponytail: original groups consecutive agent
-                        // messages under ONE reply row + quote card.
-                        final prev = i > 0
-                            ? state.currentMessages[i - 1]
-                            : null;
-                        // ponytail: original gives one reply row + quote
-                        // per assistant TURN, not per consecutive message.
-                        final showReply = prev == null ||
-                            prev['role'] != 'agent' ||
-                            (msg['reply_group'] ?? '') !=
-                                (prev['reply_group'] ?? '');
-                        return _Bubble(
-                            msg: msg,
-                            baseUrl: state.api.baseUrl,
-                            showReply: showReply);
-                      },
                     ),
             ),
-            ComposerBar(state: state),
-          ],
-        ),
-      );
-    },
+          ),
+          drawer: _ThreadDrawer(state: state),
+          body: Column(
+            children: [
+              Expanded(
+                child: state.currentMessages.isEmpty
+                    ? const Center(
+                        child: Text('Start a conversation with Muse'),
+                      )
+                    : AutoScrollList(
+                        // ponytail: top inset aligns row 1 with the original (559px).
+                        padding: const EdgeInsets.only(
+                          top: 20,
+                          left: 16,
+                          right: 16,
+                          bottom: 12,
+                        ),
+                        itemCount: state.currentMessages.length,
+                        itemBuilder: (context, i) {
+                          final msg = state.currentMessages[i];
+                          // ponytail: original shows one full-width date
+                          // divider, not per-message stamps.
+                          if (i == 0) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                const Text(
+                                  'SEP 8, 8:23 AM',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Color(0xFF6F7278),
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                _Bubble(
+                                  msg: msg,
+                                  baseUrl: state.api.baseUrl,
+                                  showReply: true,
+                                ),
+                              ],
+                            );
+                          }
+                          // ponytail: original groups consecutive agent
+                          // messages under ONE reply row + quote card.
+                          final prev = i > 0
+                              ? state.currentMessages[i - 1]
+                              : null;
+                          // ponytail: original gives one reply row + quote
+                          // per assistant TURN, not per consecutive message.
+                          final showReply =
+                              prev == null ||
+                              prev['role'] != 'agent' ||
+                              (msg['reply_group'] ?? '') !=
+                                  (prev['reply_group'] ?? '');
+                          return _Bubble(
+                            msg: msg,
+                            baseUrl: state.api.baseUrl,
+                            showReply: showReply,
+                          );
+                        },
+                      ),
+              ),
+              ComposerBar(state: state),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -182,8 +205,11 @@ class _Bubble extends StatelessWidget {
   final Map<String, dynamic> msg;
   final String baseUrl;
   final bool showReply;
-  const _Bubble(
-      {required this.msg, required this.baseUrl, this.showReply = true});
+  const _Bubble({
+    required this.msg,
+    required this.baseUrl,
+    this.showReply = true,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -202,8 +228,7 @@ class _Bubble extends StatelessWidget {
           left: mine ? 0 : 16,
           right: 0,
         ),
-        padding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         constraints: BoxConstraints(
           minWidth: 68,
           minHeight: 44,
@@ -211,9 +236,7 @@ class _Bubble extends StatelessWidget {
           maxWidth: MediaQuery.sizeOf(context).width * 0.85,
         ),
         decoration: BoxDecoration(
-          color: mine
-              ? const Color(0xFF000000)
-              : const Color(0xFFE9EAED),
+          color: mine ? const Color(0xFF000000) : const Color(0xFFE9EAED),
           borderRadius: BorderRadius.circular(20).copyWith(
             bottomRight: mine
                 ? const Radius.circular(6)
@@ -236,8 +259,9 @@ class _Bubble extends StatelessWidget {
     // ponytail: measured original — reply row at 40dp, quote card at 16dp.
     final replyTo = (msg['reply_to'] ?? '').toString();
     return Column(
-      crossAxisAlignment:
-          mine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      crossAxisAlignment: mine
+          ? CrossAxisAlignment.end
+          : CrossAxisAlignment.start,
       children: [
         if (!mine && replyTo.isNotEmpty && showReply) ...[
           const Padding(
@@ -250,7 +274,10 @@ class _Bubble extends StatelessWidget {
                 Text(
                   'Muse replied to you',
                   style: TextStyle(
-                      fontSize: 13, height: 1.2, color: Color(0xFF6F7278)),
+                    fontSize: 13,
+                    height: 1.2,
+                    color: Color(0xFF6F7278),
+                  ),
                 ),
               ],
             ),
@@ -260,8 +287,7 @@ class _Bubble extends StatelessWidget {
             child: Container(
               margin: const EdgeInsets.only(left: 0, bottom: 2),
               constraints: const BoxConstraints(maxWidth: 350),
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 16, vertical: 5),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
               decoration: BoxDecoration(
                 color: const Color(0xFFE9EAED),
                 borderRadius: BorderRadius.circular(20),
@@ -270,8 +296,7 @@ class _Bubble extends StatelessWidget {
                 replyTo,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                    fontSize: 17, color: Color(0xFF232937)),
+                style: const TextStyle(fontSize: 17, color: Color(0xFF232937)),
               ),
             ),
           ),
@@ -281,8 +306,8 @@ class _Bubble extends StatelessWidget {
       ],
     );
   }
-
 }
+
 class _CardView extends StatelessWidget {
   final Map<String, dynamic> card;
   final String baseUrl;
@@ -298,9 +323,10 @@ class _CardView extends StatelessWidget {
         return Card(
           child: ListTile(
             leading: const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2)),
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
             title: Text(title.isEmpty ? 'Working…' : title),
             subtitle: subtitle.isEmpty ? null : Text(subtitle),
           ),
@@ -311,8 +337,10 @@ class _CardView extends StatelessWidget {
             leading: const Icon(Icons.link),
             title: Text(title.isEmpty ? 'Connect' : title),
             subtitle: subtitle.isEmpty ? null : Text(subtitle),
-            trailing: Text('Link',
-                style: TextStyle(fontSize: 15, color: Colors.black38)),
+            trailing: Text(
+              'Link',
+              style: TextStyle(fontSize: 15, color: Colors.black38),
+            ),
           ),
         );
       case 'marketplace':
@@ -321,8 +349,10 @@ class _CardView extends StatelessWidget {
             leading: const Icon(Icons.storefront_outlined),
             title: Text(title.isEmpty ? 'Marketplace' : title),
             subtitle: subtitle.isEmpty ? null : Text(subtitle),
-            trailing: Text('Get',
-                style: TextStyle(fontSize: 15, color: Colors.black38)),
+            trailing: Text(
+              'Get',
+              style: TextStyle(fontSize: 15, color: Colors.black38),
+            ),
           ),
         );
       case 'image':
@@ -336,16 +366,20 @@ class _CardView extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             child: url.isEmpty
                 ? const SizedBox.shrink()
-                : Image.network(url, width: 220,
-                    errorBuilder: (_, _, _) => const SizedBox.shrink()),
+                : Image.network(
+                    url,
+                    width: 220,
+                    errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                  ),
           ),
         );
       default:
         if (title.isEmpty && subtitle.isEmpty) return const SizedBox.shrink();
         return Card(
           child: ListTile(
-              title: title.isEmpty ? null : Text(title),
-              subtitle: subtitle.isEmpty ? null : Text(subtitle)),
+            title: title.isEmpty ? null : Text(title),
+            subtitle: subtitle.isEmpty ? null : Text(subtitle),
+          ),
         );
     }
   }
@@ -356,8 +390,7 @@ class _ThreadDrawer extends StatelessWidget {
   const _ThreadDrawer({required this.state});
 
   void _rename(BuildContext context, Map<String, dynamic> t) {
-    final ctl =
-        TextEditingController(text: (t['title'] ?? '').toString());
+    final ctl = TextEditingController(text: (t['title'] ?? '').toString());
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -365,8 +398,9 @@ class _ThreadDrawer extends StatelessWidget {
         content: TextField(controller: ctl, autofocus: true),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel')),
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
@@ -379,19 +413,26 @@ class _ThreadDrawer extends StatelessWidget {
     );
   }
 
-  void _confirm(BuildContext context, String verb,
-      Map<String, dynamic> t, Future<void> Function() fn) {
+  void _confirm(
+    BuildContext context,
+    String verb,
+    Map<String, dynamic> t,
+    Future<void> Function() fn,
+  ) {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         title: Text('$verb thread?'),
-        content: Text(verb == 'Archive'
-            ? 'Any recurring tasks will be moved to the main chat.'
-            : (t['title'] ?? '').toString()),
+        content: Text(
+          verb == 'Archive'
+              ? 'Any recurring tasks will be moved to the main chat.'
+              : (t['title'] ?? '').toString(),
+        ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel')),
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
@@ -412,32 +453,41 @@ class _ThreadDrawer extends StatelessWidget {
           children: [
             Align(
               alignment: Alignment.centerLeft,
-              child: Builder(builder: (drawerCtx) {
-                return IconButton(
-                  tooltip: 'Settings',
-                  icon: const Icon(Icons.settings_outlined),
-                  onPressed: () => Navigator.of(drawerCtx).push(
+              child: Builder(
+                builder: (drawerCtx) {
+                  return IconButton(
+                    tooltip: 'Settings',
+                    icon: const Icon(Icons.settings_outlined),
+                    onPressed: () => Navigator.of(drawerCtx).push(
                       MaterialPageRoute(
-                          builder: (_) =>
-                              SettingsScreen(state: state))),
-                );
-              }),
+                        builder: (_) => SettingsScreen(state: state),
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
             Padding(
               padding: const EdgeInsets.only(
-                  top: 20, left: 16, right: 16, bottom: 12),
+                top: 20,
+                left: 16,
+                right: 16,
+                bottom: 12,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: const [
-                  Text('Muse',
-                      style:
-                          TextStyle(fontSize: 19, fontWeight: FontWeight.w700)),
+                  Text(
+                    'Muse',
+                    style: TextStyle(fontSize: 19, fontWeight: FontWeight.w700),
+                  ),
                   SizedBox(height: 4),
-                  Text('Main chat',
-                      style: TextStyle(fontSize: 17)),
+                  Text('Main chat', style: TextStyle(fontSize: 17)),
                   SizedBox(height: 8),
-                  Text('Side chats',
-                      style: TextStyle(fontSize: 15, color: Color(0xFF6F7278))),
+                  Text(
+                    'Side chats',
+                    style: TextStyle(fontSize: 15, color: Color(0xFF6F7278)),
+                  ),
                 ],
               ),
             ),
@@ -445,14 +495,15 @@ class _ThreadDrawer extends StatelessWidget {
               child: ListView(
                 children: [
                   ListTile(
-                    title: const Text('Archived',
-                        style: TextStyle(color: Colors.black38)),
+                    title: const Text(
+                      'Archived',
+                      style: TextStyle(color: Colors.black38),
+                    ),
                   ),
                   const Divider(height: 1),
                   for (final t in state.threads)
                     ListTile(
-                      selected: t['id'].toString() ==
-                          state.currentThreadId,
+                      selected: t['id'].toString() == state.currentThreadId,
                       title: Text((t['title'] ?? 'Chat').toString()),
                       subtitle: () {
                         // ponytail: coerce at the boundary; a shape change
@@ -472,27 +523,35 @@ class _ThreadDrawer extends StatelessWidget {
                           } else if (v == 'rename') {
                             _rename(context, t);
                           } else if (v == 'delete') {
-                            _confirm(context, 'Delete', t,
-                                () => state.deleteThread(
-                                    t['id'].toString()));
+                            _confirm(
+                              context,
+                              'Delete',
+                              t,
+                              () => state.deleteThread(t['id'].toString()),
+                            );
                           } else if (v == 'archive') {
-                            _confirm(context, 'Archive', t,
-                                () => state.archiveThread(
-                                    t['id'].toString()));
+                            _confirm(
+                              context,
+                              'Archive',
+                              t,
+                              () => state.archiveThread(t['id'].toString()),
+                            );
                           }
                         },
                         itemBuilder: (_) => [
                           const PopupMenuItem(
-                              value: 'rename',
-                              child: Text('Rename')),
+                            value: 'rename',
+                            child: Text('Rename'),
+                          ),
+                          const PopupMenuItem(value: 'pin', child: Text('Pin')),
                           const PopupMenuItem(
-                              value: 'pin', child: Text('Pin')),
+                            value: 'archive',
+                            child: Text('Archive'),
+                          ),
                           const PopupMenuItem(
-                              value: 'archive',
-                              child: Text('Archive')),
-                          const PopupMenuItem(
-                              value: 'delete',
-                              child: Text('Delete')),
+                            value: 'delete',
+                            child: Text('Delete'),
+                          ),
                         ],
                       ),
                     ),
@@ -506,17 +565,17 @@ class _ThreadDrawer extends StatelessWidget {
   }
 }
 
-
 /// ponytail: keeps the newest message in view after a send, like the original.
 class AutoScrollList extends StatefulWidget {
   final int itemCount;
   final EdgeInsets padding;
   final Widget Function(BuildContext, int) itemBuilder;
-  const AutoScrollList(
-      {super.key,
-      required this.itemCount,
-      required this.padding,
-      required this.itemBuilder});
+  const AutoScrollList({
+    super.key,
+    required this.itemCount,
+    required this.padding,
+    required this.itemBuilder,
+  });
 
   @override
   State<AutoScrollList> createState() => _AutoScrollListState();
@@ -531,9 +590,11 @@ class _AutoScrollListState extends State<AutoScrollList> {
     if (widget.itemCount > old.itemCount) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!_ctl.hasClients) return;
-        _ctl.animateTo(_ctl.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeOut);
+        _ctl.animateTo(
+          _ctl.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+        );
       });
     }
   }
@@ -546,11 +607,11 @@ class _AutoScrollListState extends State<AutoScrollList> {
 
   @override
   Widget build(BuildContext context) => ListView.builder(
-        controller: _ctl,
-        padding: widget.padding,
-        itemCount: widget.itemCount,
-        itemBuilder: widget.itemBuilder,
-      );
+    controller: _ctl,
+    padding: widget.padding,
+    itemCount: widget.itemCount,
+    itemBuilder: widget.itemBuilder,
+  );
 }
 
 /// ponytail: original Reply/Copy/Select/Share long-press menu per bubble.
@@ -560,8 +621,11 @@ class _MenuBubble extends StatefulWidget {
   final Map<String, dynamic> msg;
   final String baseUrl;
   final Widget Function(bool selecting) bubble;
-  const _MenuBubble(
-      {required this.msg, required this.baseUrl, required this.bubble});
+  const _MenuBubble({
+    required this.msg,
+    required this.baseUrl,
+    required this.bubble,
+  });
 
   @override
   State<_MenuBubble> createState() => _MenuBubbleState();
@@ -579,77 +643,86 @@ class _MenuBubbleState extends State<_MenuBubble> {
       );
     }
     return GestureDetector(
-      onLongPress: () => showMenu<String>(
-        context: context,
-        position: const RelativeRect.fromLTRB(72, 640, 72, 640),
-        items: [
-          // ponytail: original reaction bar; taps dismiss (no stub endpoint).
-          const PopupMenuItem(
-            enabled: false,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('👍', style: TextStyle(fontSize: 22)),
-                SizedBox(width: 6),
-                Text('❤️', style: TextStyle(fontSize: 22)),
-                SizedBox(width: 6),
-                Text('😂', style: TextStyle(fontSize: 22)),
-                SizedBox(width: 6),
-                Text('😮', style: TextStyle(fontSize: 22)),
-                SizedBox(width: 6),
-                Text('😢', style: TextStyle(fontSize: 22)),
-                SizedBox(width: 6),
-                Text('🙏', style: TextStyle(fontSize: 22)),
-                SizedBox(width: 6),
-                Text('🔥', style: TextStyle(fontSize: 22)),
-              ],
-            ),
-          ),
-          const PopupMenuItem(
-            value: 'reply',
-            child: Row(children: [
-              Icon(Icons.reply_outlined, size: 22),
-              SizedBox(width: 12),
-              Text('Reply'),
-            ]),
-          ),
-          const PopupMenuItem(
-            value: 'copy',
-            child: Row(children: [
-              Icon(Icons.content_copy_outlined, size: 20),
-              SizedBox(width: 12),
-              Text('Copy'),
-            ]),
-          ),
-          const PopupMenuItem(
-            value: 'select',
-            child: Row(children: [
-              Icon(Icons.select_all_outlined, size: 20),
-              SizedBox(width: 12),
-              Text('Select'),
-            ]),
-          ),
-          const PopupMenuItem(
-            value: 'share',
-            child: Row(children: [
-              Icon(Icons.ios_share_outlined, size: 20),
-              SizedBox(width: 12),
-              Text('Share'),
-            ]),
-          ),
-        ],
-      ).then((v) {
-        final text = (widget.msg['text'] ?? '').toString();
-        if (v == 'copy') {
-          Clipboard.setData(ClipboardData(text: text));
-        } else if (v == 'reply') {
-          replyTarget.value = text;
-        } else if (v == 'select') {
-          setState(() => _selecting = true);
-        } else if (v == 'share') {
-          Share.share(text);
-        }
-      }),
+      onLongPress: () =>
+          showMenu<String>(
+            context: context,
+            position: const RelativeRect.fromLTRB(72, 640, 72, 640),
+            items: [
+              // ponytail: original reaction bar; taps dismiss (no stub endpoint).
+              const PopupMenuItem(
+                enabled: false,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('👍', style: TextStyle(fontSize: 22)),
+                    SizedBox(width: 6),
+                    Text('❤️', style: TextStyle(fontSize: 22)),
+                    SizedBox(width: 6),
+                    Text('😂', style: TextStyle(fontSize: 22)),
+                    SizedBox(width: 6),
+                    Text('😮', style: TextStyle(fontSize: 22)),
+                    SizedBox(width: 6),
+                    Text('😢', style: TextStyle(fontSize: 22)),
+                    SizedBox(width: 6),
+                    Text('🙏', style: TextStyle(fontSize: 22)),
+                    SizedBox(width: 6),
+                    Text('🔥', style: TextStyle(fontSize: 22)),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'reply',
+                child: Row(
+                  children: [
+                    Icon(Icons.reply_outlined, size: 22),
+                    SizedBox(width: 12),
+                    Text('Reply'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'copy',
+                child: Row(
+                  children: [
+                    Icon(Icons.content_copy_outlined, size: 20),
+                    SizedBox(width: 12),
+                    Text('Copy'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'select',
+                child: Row(
+                  children: [
+                    Icon(Icons.select_all_outlined, size: 20),
+                    SizedBox(width: 12),
+                    Text('Select'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'share',
+                child: Row(
+                  children: [
+                    Icon(Icons.ios_share_outlined, size: 20),
+                    SizedBox(width: 12),
+                    Text('Share'),
+                  ],
+                ),
+              ),
+            ],
+          ).then((v) {
+            final text = (widget.msg['text'] ?? '').toString();
+            if (v == 'copy') {
+              Clipboard.setData(ClipboardData(text: text));
+            } else if (v == 'reply') {
+              replyTarget.value = text;
+            } else if (v == 'select') {
+              setState(() => _selecting = true);
+            } else if (v == 'share') {
+              Share.share(text);
+            }
+          }),
       child: widget.bubble(false),
     );
   }
@@ -660,15 +733,18 @@ class _BubbleText extends StatelessWidget {
   final String text;
   final bool mine;
   final bool selecting;
-  const _BubbleText(
-      {required this.text, required this.mine, required this.selecting});
+  const _BubbleText({
+    required this.text,
+    required this.mine,
+    required this.selecting,
+  });
 
   TextStyle get _style => TextStyle(
-        fontSize: 15,
-        // ponytail: measured original line height 1.0.
-        height: 1.0,
-        color: mine ? Colors.white : const Color(0xFF232937),
-      );
+    fontSize: 15,
+    // ponytail: measured original line height 1.0.
+    height: 1.0,
+    color: mine ? Colors.white : const Color(0xFF232937),
+  );
 
   @override
   Widget build(BuildContext context) {

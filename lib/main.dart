@@ -38,10 +38,10 @@ class _MuseAppState extends State<MuseApp> {
         home: state.gatewayError
             ? GateErrorScreen(state: state, showGear: false)
             : state.stage == SessionStage.main && !state.tosAccepted
-                ? TosScreen(state: state)
-                : state.stage == SessionStage.main
-                    ? AdaptiveShell(state: state)
-                    : OnboardingFlow(state: state),
+            ? TosScreen(state: state)
+            : state.stage == SessionStage.main
+            ? AdaptiveShell(state: state)
+            : OnboardingFlow(state: state),
       ),
     );
   }

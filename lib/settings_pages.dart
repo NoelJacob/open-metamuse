@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
 import 'state.dart';
+
 import 'package:permission_handler/permission_handler.dart';
 
 // ponytail: static grouped-card ports; form submits stay disabled, no backend.
@@ -36,17 +37,24 @@ class _SubPage extends StatelessWidget {
                         width: 48,
                         height: 48,
                         decoration: const BoxDecoration(
-                            shape: BoxShape.circle, color: Colors.white),
-                        child: const Icon(Icons.arrow_back,
-                            color: Colors.black),
+                          shape: BoxShape.circle,
+                          color: Colors.white,
+                        ),
+                        child: const Icon(
+                          Icons.arrow_back,
+                          color: Colors.black,
+                        ),
                       ),
                     ),
                   ),
-                  Text(title,
-                      style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black)),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -54,8 +62,9 @@ class _SubPage extends StatelessWidget {
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
                 child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: children),
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: children,
+                ),
               ),
             ),
           ],
@@ -73,7 +82,9 @@ class _Card extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-          color: Colors.white, borderRadius: BorderRadius.circular(28)),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+      ),
       child: Column(children: children),
     );
   }
@@ -95,9 +106,10 @@ class _Row extends StatelessWidget {
         child: Row(
           children: [
             Expanded(
-              child: Text(label,
-                  style: const TextStyle(
-                      fontSize: 17, color: Colors.black)),
+              child: Text(
+                label,
+                style: const TextStyle(fontSize: 17, color: Colors.black),
+              ),
             ),
             trailing,
           ],
@@ -108,9 +120,9 @@ class _Row extends StatelessWidget {
 }
 
 Widget _divider() => const Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20),
-      child: Divider(height: 1, color: Color(0xFFE8E9ED)),
-    );
+  padding: EdgeInsets.symmetric(horizontal: 20),
+  child: Divider(height: 1, color: Color(0xFFE8E9ED)),
+);
 
 class _SectionLabel extends StatelessWidget {
   final String label;
@@ -120,30 +132,31 @@ class _SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 20, 8, 8),
-      child: Text(label,
-          style: const TextStyle(fontSize: 15, color: _muted)),
+      child: Text(label, style: const TextStyle(fontSize: 15, color: _muted)),
     );
   }
 }
 
 Widget _disabledPill(String label) => SizedBox(
-      height: 56,
-      child: FilledButton(
-        onPressed: null,
-        style: FilledButton.styleFrom(
-          shape: const StadiumBorder(),
-          disabledBackgroundColor: _paleBlue,
-        ),
-        child: Text(label,
-            style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Colors.white70)),
+  height: 56,
+  child: FilledButton(
+    onPressed: null,
+    style: FilledButton.styleFrom(
+      shape: const StadiumBorder(),
+      disabledBackgroundColor: _paleBlue,
+    ),
+    child: Text(
+      label,
+      style: const TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.w600,
+        color: Colors.white70,
       ),
-    );
+    ),
+  ),
+);
 
-const _chev =
-    Icon(Icons.chevron_right, color: Color(0xFFC7C9D1), size: 24);
+const _chev = Icon(Icons.chevron_right, color: Color(0xFFC7C9D1), size: 24);
 const _ext = Icon(Icons.north_east, color: Color(0xFFC7C9D1), size: 20);
 
 class LegalInfoScreen extends StatelessWidget {
@@ -171,25 +184,25 @@ class LegalInfoScreen extends StatelessWidget {
               style: TextStyle(fontSize: 15, color: _muted, height: 1.35),
               children: [
                 TextSpan(
-                    text:
-                        'Responses are generated by AI. Some may be inaccurate or inappropriate. '),
+                  text: 'Responses are generated by AI. Some may be inaccurate or inappropriate. ',
+                ),
                 TextSpan(
-                    text: 'Learn more',
-                    style: TextStyle(color: _link)),
+                  text: 'Learn more',
+                  style: TextStyle(color: _link),
+                ),
               ],
             ),
           ),
         ),
         const SizedBox(height: 12),
-        _Card(children: [
-          for (var i = 0; i < _rows.length; i++) ...[
-            _Row(
-                label: _rows[i],
-                trailing: _ext,
-                onTap: null),
-            if (i != _rows.length - 1) _divider(),
+        _Card(
+          children: [
+            for (var i = 0; i < _rows.length; i++) ...[
+              _Row(label: _rows[i], trailing: _ext, onTap: null),
+              if (i != _rows.length - 1) _divider(),
+            ],
           ],
-        ]),
+        ),
       ],
     );
   }
@@ -210,39 +223,42 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
     return _SubPage(
       title: 'Help & support',
       children: [
-        _Card(children: [
-          _Row(
-              label: 'Muse Help Center',
-              trailing: _ext,
-              onTap: null),
-          _divider(),
-          _Row(
+        _Card(
+          children: [
+            _Row(label: 'Muse Help Center', trailing: _ext, onTap: null),
+            _divider(),
+            _Row(
               label: 'Submit feedback',
               trailing: _chev,
-              onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (_) => const SubmitFeedbackScreen()))),
-        ]),
-        const SizedBox(height: 16),
-        _Card(children: [
-          Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            child: Row(
-              children: [
-                const Expanded(
-                  child: Text('Shake phone to report an issue',
-                      style:
-                          TextStyle(fontSize: 17, color: Colors.black)),
-                ),
-                Switch(
-                  value: _shake,
-                  activeThumbColor: _link,
-                  onChanged: (v) => setState(() => _shake = v),
-                ),
-              ],
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const SubmitFeedbackScreen()),
+              ),
             ),
-          ),
-        ]),
+          ],
+        ),
+        const SizedBox(height: 16),
+        _Card(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              child: Row(
+                children: [
+                  const Expanded(
+                    child: Text(
+                      'Shake phone to report an issue',
+                      style: TextStyle(fontSize: 17, color: Colors.black),
+                    ),
+                  ),
+                  Switch(
+                    value: _shake,
+                    activeThumbColor: _link,
+                    onChanged: (v) => setState(() => _shake = v),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -269,58 +285,66 @@ class _SubmitFeedbackScreenState extends State<SubmitFeedbackScreen> {
       title: 'Submit feedback',
       children: [
         const _SectionLabel('Contact info'),
-        const _Card(children: [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-            child: TextField(
-              decoration: InputDecoration(
+        const _Card(
+          children: [
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+              child: TextField(
+                decoration: InputDecoration(
                   hintText: 'Full name',
                   hintStyle: TextStyle(fontSize: 17, color: _muted),
-                  border: InputBorder.none),
+                  border: InputBorder.none,
+                ),
+              ),
             ),
-          ),
-          _Divider(),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-            child: TextField(
-              keyboardType: TextInputType.emailAddress,
-              decoration: InputDecoration(
+            _Divider(),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+              child: TextField(
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
                   hintText: 'Email',
                   hintStyle: TextStyle(fontSize: 17, color: _muted),
-                  border: InputBorder.none),
+                  border: InputBorder.none,
+                ),
+              ),
             ),
-          ),
-        ]),
+          ],
+        ),
         const _SectionLabel('Select a topic'),
-        _Card(children: [
-          for (var i = 0; i < _topics.length; i++) ...[
-            _Row(
+        _Card(
+          children: [
+            for (var i = 0; i < _topics.length; i++) ...[
+              _Row(
                 label: _topics[i],
                 trailing: Icon(
-                    _topic == i
-                        ? Icons.check_circle
-                        : Icons.circle_outlined,
-                    color: _topic == i
-                        ? const Color(0xFF0064E0)
-                        : const Color(0xFFC7C9D1)),
-                onTap: () => setState(() => _topic = i)),
-            if (i != _topics.length - 1) _divider(),
+                  _topic == i ? Icons.check_circle : Icons.circle_outlined,
+                  color: _topic == i
+                      ? const Color(0xFF0064E0)
+                      : const Color(0xFFC7C9D1),
+                ),
+                onTap: () => setState(() => _topic = i),
+              ),
+              if (i != _topics.length - 1) _divider(),
+            ],
           ],
-        ]),
+        ),
         const _SectionLabel('Describe your issue'),
         Container(
           decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(28)),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(28),
+          ),
           child: const Padding(
             padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             child: TextField(
               maxLines: 5,
               minLines: 5,
               decoration: InputDecoration(
-                  hintText: 'Describe your issue',
-                  hintStyle: TextStyle(fontSize: 17, color: _muted),
-                  border: InputBorder.none),
+                hintText: 'Describe your issue',
+                hintStyle: TextStyle(fontSize: 17, color: _muted),
+                border: InputBorder.none,
+              ),
             ),
           ),
         ),
@@ -363,33 +387,41 @@ class ReportIssueScreen extends StatelessWidget {
       children: [
         const Padding(
           padding: EdgeInsets.fromLTRB(8, 8, 8, 8),
-          child: Text('What went wrong?',
-              style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.black)),
+          child: Text(
+            'What went wrong?',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: Colors.black,
+            ),
+          ),
         ),
         Container(
           decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(28)),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(28),
+          ),
           child: const Padding(
             padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             child: TextField(
               maxLines: 5,
               minLines: 5,
               decoration: InputDecoration(
-                  hintText: 'Describe the bug you encountered...',
-                  hintStyle: TextStyle(fontSize: 17, color: _muted),
-                  border: InputBorder.none),
+                hintText: 'Describe the bug you encountered...',
+                hintStyle: TextStyle(fontSize: 17, color: _muted),
+                border: InputBorder.none,
+              ),
             ),
           ),
         ),
         const _SectionLabel('Attachments'),
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 8),
-          child: Icon(Icons.add_photo_alternate_outlined,
-              size: 36, color: _muted),
+          child: Icon(
+            Icons.add_photo_alternate_outlined,
+            size: 36,
+            color: _muted,
+          ),
         ),
         const _SectionLabel('Category'),
         Wrap(
@@ -399,21 +431,23 @@ class ReportIssueScreen extends StatelessWidget {
             for (final (icon, label) in _cats)
               Container(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 14, vertical: 10),
+                  horizontal: 14,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(22),
-                  border: Border.all(
-                      color: const Color(0xFFE2E3E8), width: 1),
+                  border: Border.all(color: const Color(0xFFE2E3E8), width: 1),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(icon, size: 18, color: Colors.black),
                     const SizedBox(width: 6),
-                    Text(label,
-                        style: const TextStyle(
-                            fontSize: 15, color: Colors.black)),
+                    Text(
+                      label,
+                      style: const TextStyle(fontSize: 15, color: Colors.black),
+                    ),
                   ],
                 ),
               ),
@@ -444,30 +478,34 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     return _SubPage(
       title: 'Notifications',
       children: [
-        _Card(children: [
-          Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            child: Row(
-              children: [
-                const Expanded(
-                  child: Text('Allow notifications',
-                      style: TextStyle(fontSize: 17, color: Colors.black)),
-                ),
-                Switch(
-                  value: _enabled,
-                  activeThumbColor: _link,
-                  onChanged: (v) => setState(() => _enabled = v),
-                ),
-              ],
+        _Card(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              child: Row(
+                children: [
+                  const Expanded(
+                    child: Text(
+                      'Allow notifications',
+                      style: TextStyle(fontSize: 17, color: Colors.black),
+                    ),
+                  ),
+                  Switch(
+                    value: _enabled,
+                    activeThumbColor: _link,
+                    onChanged: (v) => setState(() => _enabled = v),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ]),
+          ],
+        ),
         const Padding(
           padding: EdgeInsets.fromLTRB(20, 8, 20, 0),
           child: Text(
-              'Get notified when your agent responds or completes a task.',
-              style: TextStyle(fontSize: 13, color: Color(0xFF6F7278))),
+            'Get notified when your agent responds or completes a task.',
+            style: TextStyle(fontSize: 13, color: Color(0xFF6F7278)),
+          ),
         ),
       ],
     );
@@ -489,30 +527,34 @@ class _AppLockScreenState extends State<AppLockScreen> {
     return _SubPage(
       title: 'App lock',
       children: [
-        _Card(children: [
-          Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            child: Row(
-              children: [
-                const Expanded(
-                  child: Text('Require biometrics',
-                      style: TextStyle(fontSize: 17, color: Colors.black)),
-                ),
-                Switch(
-                  value: _enabled,
-                  activeThumbColor: _link,
-                  onChanged: (v) => setState(() => _enabled = v),
-                ),
-              ],
+        _Card(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              child: Row(
+                children: [
+                  const Expanded(
+                    child: Text(
+                      'Require biometrics',
+                      style: TextStyle(fontSize: 17, color: Colors.black),
+                    ),
+                  ),
+                  Switch(
+                    value: _enabled,
+                    activeThumbColor: _link,
+                    onChanged: (v) => setState(() => _enabled = v),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ]),
+          ],
+        ),
         const Padding(
           padding: EdgeInsets.fromLTRB(20, 8, 20, 0),
           child: Text(
-              "You'll need to use your face or fingerprint to open the Muse app.",
-              style: TextStyle(fontSize: 13, color: Color(0xFF6F7278))),
+            "You'll need to use your face or fingerprint to open the Muse app.",
+            style: TextStyle(fontSize: 13, color: Color(0xFF6F7278)),
+          ),
         ),
       ],
     );
@@ -534,73 +576,87 @@ class _DataControlsScreenState extends State<DataControlsScreen> {
     return _SubPage(
       title: 'Data controls',
       children: [
-        _Card(children: [
-          Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Icon(Icons.shield_outlined,
-                    size: 28, color: Colors.black),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: RichText(
-                    text: const TextSpan(
-                      style: TextStyle(
+        _Card(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(
+                    Icons.shield_outlined,
+                    size: 28,
+                    color: Colors.black,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: RichText(
+                      text: const TextSpan(
+                        style: TextStyle(
                           fontSize: 15,
                           color: Colors.black,
-                          height: 1.35),
-                      children: [
-                        TextSpan(
+                          height: 1.35,
+                        ),
+                        children: [
+                          TextSpan(
                             text: 'Your privacy is important to us\n',
-                            style: TextStyle(fontWeight: FontWeight.w700)),
-                        TextSpan(
-                            text:
-                                'Learn about the steps we take to keep your information private and secure. '),
-                        TextSpan(
+                            style: TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                          TextSpan(
+                            text: 'Learn about the steps we take to keep your information private and secure. ',
+                          ),
+                          TextSpan(
                             text: 'Learn more',
-                            style: TextStyle(color: Color(0xFF0064E0))),
-                      ],
+                            style: TextStyle(color: Color(0xFF0064E0)),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ]),
+          ],
+        ),
         const SizedBox(height: 16),
-        _Card(children: [
-          _Row(
+        _Card(
+          children: [
+            _Row(
               label: 'Help improve our AI models',
               trailing: Icon(
-                  _expanded ? Icons.expand_less : Icons.expand_more,
-                  color: const Color(0xFFC7C9D1),
-                  size: 24),
-              onTap: () => setState(() => _expanded = !_expanded)),
-          if (_expanded)
-            const Padding(
-              padding: EdgeInsets.fromLTRB(20, 0, 20, 18),
-              child: Text(
+                _expanded ? Icons.expand_less : Icons.expand_more,
+                color: const Color(0xFFC7C9D1),
+                size: 24,
+              ),
+              onTap: () => setState(() => _expanded = !_expanded),
+            ),
+            if (_expanded)
+              const Padding(
+                padding: EdgeInsets.fromLTRB(20, 0, 20, 18),
+                child: Text(
                   'Allow us to use your interactions with Muse to develop and improve AI at Meta.',
                   style: TextStyle(
-                      fontSize: 15,
-                      color: Color(0xFF6F7278),
-                      height: 1.35)),
-            ),
-        ]),
+                    fontSize: 15,
+                    color: Color(0xFF6F7278),
+                    height: 1.35,
+                  ),
+                ),
+              ),
+          ],
+        ),
         const Padding(
           padding: EdgeInsets.fromLTRB(20, 8, 20, 0),
           child: Text(
-              'Allow us to use your interactions with Muse to develop and improve AI at Meta.',
-              style: TextStyle(fontSize: 13, color: Color(0xFF6F7278))),
+            'Allow us to use your interactions with Muse to develop and improve AI at Meta.',
+            style: TextStyle(fontSize: 13, color: Color(0xFF6F7278)),
+          ),
         ),
         const SizedBox(height: 16),
-        _Card(children: const [
-          _Row(
-              label: 'Import memory to Muse',
-              trailing: SizedBox.shrink()),
-        ]),
+        _Card(
+          children: const [
+            _Row(label: 'Import memory to Muse', trailing: SizedBox.shrink()),
+          ],
+        ),
       ],
     );
   }
@@ -614,8 +670,7 @@ class ConnectorDefaultsScreen extends StatefulWidget {
       _ConnectorDefaultsScreenState();
 }
 
-class _ConnectorDefaultsScreenState
-    extends State<ConnectorDefaultsScreen> {
+class _ConnectorDefaultsScreenState extends State<ConnectorDefaultsScreen> {
   String _mode = 'some';
 
   @override
@@ -626,19 +681,24 @@ class _ConnectorDefaultsScreenState
         RadioGroup<String>(
           groupValue: _mode,
           onChanged: (v) => setState(() => _mode = v!),
-          child: _Card(children: [
-            const _Row(
+          child: _Card(
+            children: [
+              const _Row(
                 label: 'Ask for some actions',
-                trailing: Radio<String>(value: 'some')),
-            _divider(),
-            const _Row(
+                trailing: Radio<String>(value: 'some'),
+              ),
+              _divider(),
+              const _Row(
                 label: 'Before every write and some read actions',
-                trailing: Radio<String>(value: 'write')),
-            _divider(),
-            const _Row(
+                trailing: Radio<String>(value: 'write'),
+              ),
+              _divider(),
+              const _Row(
                 label: 'Always ask',
-                trailing: Radio<String>(value: 'always')),
-          ]),
+                trailing: Radio<String>(value: 'always'),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -656,15 +716,19 @@ class DevicesScreen extends StatelessWidget {
     return _SubPage(
       title: 'Devices',
       children: const [
-        _Card(children: [
-          Padding(
-            padding: EdgeInsets.all(32),
-            child: Center(
-              child: Text('No devices connected',
-                  style: TextStyle(fontSize: 16, color: Color(0xFF6F7278))),
+        _Card(
+          children: [
+            Padding(
+              padding: EdgeInsets.all(32),
+              child: Center(
+                child: Text(
+                  'No devices connected',
+                  style: TextStyle(fontSize: 16, color: Color(0xFF6F7278)),
+                ),
+              ),
             ),
-          ),
-        ]),
+          ],
+        ),
       ],
     );
   }
@@ -684,19 +748,24 @@ class AppearanceScreen extends StatelessWidget {
           RadioGroup<ThemeMode>(
             groupValue: state.themeMode,
             onChanged: (v) => state.setTheme(v!),
-            child: _Card(children: [
-              const _Row(
+            child: _Card(
+              children: [
+                const _Row(
                   label: 'Light',
-                  trailing: Radio<ThemeMode>(value: ThemeMode.light)),
-              _divider(),
-              const _Row(
+                  trailing: Radio<ThemeMode>(value: ThemeMode.light),
+                ),
+                _divider(),
+                const _Row(
                   label: 'Dark',
-                  trailing: Radio<ThemeMode>(value: ThemeMode.dark)),
-              _divider(),
-              const _Row(
+                  trailing: Radio<ThemeMode>(value: ThemeMode.dark),
+                ),
+                _divider(),
+                const _Row(
                   label: 'System',
-                  trailing: Radio<ThemeMode>(value: ThemeMode.system)),
-            ]),
+                  trailing: Radio<ThemeMode>(value: ThemeMode.system),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -712,17 +781,23 @@ class DefaultAssistantScreen extends StatelessWidget {
     return _SubPage(
       title: 'Set as default assistant',
       children: [
-        _Card(children: [
-          _Row(
+        _Card(
+          children: [
+            _Row(
               label: 'Open system settings',
               trailing: _chev,
-              onTap: () { openAppSettings(); }),
-        ]),
+              onTap: () {
+                openAppSettings();
+              },
+            ),
+          ],
+        ),
         const Padding(
           padding: EdgeInsets.fromLTRB(20, 8, 20, 0),
           child: Text(
-              'Choose Muse as your default assistant app in system settings.',
-              style: TextStyle(fontSize: 13, color: Color(0xFF6F7278))),
+            'Choose Muse as your default assistant app in system settings.',
+            style: TextStyle(fontSize: 13, color: Color(0xFF6F7278)),
+          ),
         ),
       ],
     );

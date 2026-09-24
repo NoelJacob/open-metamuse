@@ -14,24 +14,28 @@ class SettingsScreen extends StatelessWidget {
       barrierColor: Colors.black54,
       builder: (d) => Dialog(
         backgroundColor: Colors.white,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text('Log out',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black)),
+              const Text(
+                'Log out',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black,
+                ),
+              ),
               const SizedBox(height: 8),
-              const Text('Are you sure you want to log out?',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16, color: Color(0xFF6F7278))),
+              const Text(
+                'Are you sure you want to log out?',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16, color: Color(0xFF6F7278)),
+              ),
               const SizedBox(height: 20),
               SizedBox(
                 height: 52,
@@ -45,19 +49,23 @@ class SettingsScreen extends StatelessWidget {
                     shape: const StadiumBorder(),
                     backgroundColor: const Color(0xFFD81E2E),
                   ),
-                  child: const Text('Log out',
-                      style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white)),
+                  child: const Text(
+                    'Log out',
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 4),
               TextButton(
                 onPressed: () => Navigator.of(d).pop(),
-                child: const Text('Cancel',
-                    style:
-                        TextStyle(fontSize: 17, color: Colors.black)),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(fontSize: 17, color: Colors.black),
+                ),
               ),
             ],
           ),
@@ -89,17 +97,24 @@ class SettingsScreen extends StatelessWidget {
                         width: 48,
                         height: 48,
                         decoration: const BoxDecoration(
-                            shape: BoxShape.circle, color: Colors.white),
-                        child: const Icon(Icons.arrow_back,
-                            color: Colors.black),
+                          shape: BoxShape.circle,
+                          color: Colors.white,
+                        ),
+                        child: const Icon(
+                          Icons.arrow_back,
+                          color: Colors.black,
+                        ),
                       ),
                     ),
                   ),
-                  const Text('Settings',
-                      style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black)),
+                  const Text(
+                    'Settings',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -111,211 +126,251 @@ class SettingsScreen extends StatelessWidget {
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(28)),
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(28),
+                      ),
                       child: Column(
                         children: [
                           if (!loggedOut)
-                          _HubRow(
-                            icon: const Icon(Icons.devices_outlined,
-                                size: 28),
-                            label: 'Devices',
-                            onTap: () => Navigator.of(context).push(
+                            _HubRow(
+                              icon: const Icon(
+                                Icons.devices_outlined,
+                                size: 28,
+                              ),
+                              label: 'Devices',
+                              onTap: () => Navigator.of(context).push(
                                 MaterialPageRoute(
-                                    builder: (_) =>
-                                        const DevicesScreen())),
-                          ),
+                                  builder: (_) => const DevicesScreen(),
+                                ),
+                              ),
+                            ),
                           if (!loggedOut)
-                          const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 20),
-                            child: Divider(
-                                height: 1, color: Color(0xFFE8E9ED)),
-                          ),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 20),
+                              child: Divider(
+                                height: 1,
+                                color: Color(0xFFE8E9ED),
+                              ),
+                            ),
                           if (!loggedOut)
-                          _HubRow(
-                            icon: const Icon(Icons.notifications_outlined,
-                                size: 28),
-                            label: 'Notifications',
-                            onTap: () => Navigator.of(context).push(
+                            _HubRow(
+                              icon: const Icon(
+                                Icons.notifications_outlined,
+                                size: 28,
+                              ),
+                              label: 'Notifications',
+                              onTap: () => Navigator.of(context).push(
                                 MaterialPageRoute(
-                                    builder: (_) =>
-                                        const NotificationsScreen())),
-                          ),
+                                  builder: (_) => const NotificationsScreen(),
+                                ),
+                              ),
+                            ),
                           if (!loggedOut)
-                          const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 20),
-                            child: Divider(
-                                height: 1, color: Color(0xFFE8E9ED)),
-                          ),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 20),
+                              child: Divider(
+                                height: 1,
+                                color: Color(0xFFE8E9ED),
+                              ),
+                            ),
                           if (!loggedOut)
-                          _HubRow(
-                            icon: const Icon(Icons.edit_outlined,
-                                size: 28),
-                            label: 'Appearance',
-                            onTap: () => Navigator.of(context).push(
+                            _HubRow(
+                              icon: const Icon(Icons.edit_outlined, size: 28),
+                              label: 'Appearance',
+                              onTap: () => Navigator.of(context).push(
                                 MaterialPageRoute(
-                                    builder: (_) => AppearanceScreen(
-                                        state: state))),
-                          ),
+                                  builder: (_) =>
+                                      AppearanceScreen(state: state),
+                                ),
+                              ),
+                            ),
                           if (!loggedOut)
-                          const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 20),
-                            child: Divider(
-                                height: 1, color: Color(0xFFE8E9ED)),
-                          ),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 20),
+                              child: Divider(
+                                height: 1,
+                                color: Color(0xFFE8E9ED),
+                              ),
+                            ),
                           if (!loggedOut)
-                          _HubRow(
-                            icon: const Icon(Icons.lock_outlined, size: 28),
-                            label: 'App lock',
-                            onTap: () => Navigator.of(context).push(
+                            _HubRow(
+                              icon: const Icon(Icons.lock_outlined, size: 28),
+                              label: 'App lock',
+                              onTap: () => Navigator.of(context).push(
                                 MaterialPageRoute(
-                                    builder: (_) =>
-                                        const AppLockScreen())),
-                          ),
+                                  builder: (_) => const AppLockScreen(),
+                                ),
+                              ),
+                            ),
                           if (!loggedOut)
-                          const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 20),
-                            child: Divider(
-                                height: 1, color: Color(0xFFE8E9ED)),
-                          ),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 20),
+                              child: Divider(
+                                height: 1,
+                                color: Color(0xFFE8E9ED),
+                              ),
+                            ),
                           if (!loggedOut)
-                          _HubRow(
-                            icon: const Icon(
+                            _HubRow(
+                              icon: const Icon(
                                 Icons.phone_android_outlined,
-                                size: 28),
-                            label: 'Set as default assistant',
-                            onTap: () => Navigator.of(context).push(
+                                size: 28,
+                              ),
+                              label: 'Set as default assistant',
+                              onTap: () => Navigator.of(context).push(
                                 MaterialPageRoute(
-                                    builder: (_) =>
-                                        const DefaultAssistantScreen())),
-                          ),
+                                  builder: (_) =>
+                                      const DefaultAssistantScreen(),
+                                ),
+                              ),
+                            ),
                           if (!loggedOut)
-                          const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 20),
-                            child: Divider(
-                                height: 1, color: Color(0xFFE8E9ED)),
-                          ),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 20),
+                              child: Divider(
+                                height: 1,
+                                color: Color(0xFFE8E9ED),
+                              ),
+                            ),
                           if (!loggedOut)
-                          _HubRow(
-                            icon: const Icon(Icons.shield_outlined,
-                                size: 28),
-                            label: 'Data controls',
-                            onTap: () => Navigator.of(context).push(
+                            _HubRow(
+                              icon: const Icon(Icons.shield_outlined, size: 28),
+                              label: 'Data controls',
+                              onTap: () => Navigator.of(context).push(
                                 MaterialPageRoute(
-                                    builder: (_) =>
-                                        const DataControlsScreen())),
-                          ),
+                                  builder: (_) => const DataControlsScreen(),
+                                ),
+                              ),
+                            ),
                           if (!loggedOut)
-                          const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 20),
-                            child: Divider(
-                                height: 1, color: Color(0xFFE8E9ED)),
-                          ),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 20),
+                              child: Divider(
+                                height: 1,
+                                color: Color(0xFFE8E9ED),
+                              ),
+                            ),
                           if (!loggedOut)
-                          _HubRow(
-                            icon: const Icon(Icons.info_outlined,
-                                size: 28),
-                            label: 'Report an issue',
-                            onTap: () => Navigator.of(context).push(
+                            _HubRow(
+                              icon: const Icon(Icons.info_outlined, size: 28),
+                              label: 'Report an issue',
+                              onTap: () => Navigator.of(context).push(
                                 MaterialPageRoute(
-                                    builder: (_) =>
-                                        const ReportIssueScreen())),
-                          ),
+                                  builder: (_) => const ReportIssueScreen(),
+                                ),
+                              ),
+                            ),
                           if (!loggedOut)
-                          const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 20),
-                            child: Divider(
-                                height: 1, color: Color(0xFFE8E9ED)),
-                          ),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 20),
+                              child: Divider(
+                                height: 1,
+                                color: Color(0xFFE8E9ED),
+                              ),
+                            ),
                           _HubRow(
                             icon: SvgPicture.asset(
-                                'assets/icons/muse_help.svg',
-                                width: 28,
-                                height: 28),
+                              'assets/icons/muse_help.svg',
+                              width: 28,
+                              height: 28,
+                            ),
                             label: 'Help & support',
                             onTap: () => Navigator.of(context).push(
-                                MaterialPageRoute(
-                                    builder: (_) =>
-                                        const HelpSupportScreen())),
+                              MaterialPageRoute(
+                                builder: (_) => const HelpSupportScreen(),
+                              ),
+                            ),
                           ),
                           const Padding(
                             padding: EdgeInsets.symmetric(horizontal: 20),
-                            child: Divider(
-                                height: 1, color: Color(0xFFE8E9ED)),
+                            child: Divider(height: 1, color: Color(0xFFE8E9ED)),
                           ),
                           _HubRow(
                             icon: SvgPicture.asset(
-                                'assets/icons/muse_shield_small.svg',
-                                width: 28,
-                                height: 28),
+                              'assets/icons/muse_shield_small.svg',
+                              width: 28,
+                              height: 28,
+                            ),
                             label: 'Legal info',
                             onTap: () => Navigator.of(context).push(
-                                MaterialPageRoute(
-                                    builder: (_) =>
-                                        const LegalInfoScreen())),
+                              MaterialPageRoute(
+                                builder: (_) => const LegalInfoScreen(),
+                              ),
+                            ),
                           ),
                         ],
                       ),
                     ),
                     if (!loggedOut)
-                    Container(
-                      decoration: BoxDecoration(
+                      Container(
+                        decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(28)),
-                      child: _HubRow(
-                        icon: const Icon(Icons.tune_outlined, size: 28),
-                        label: 'Connector defaults',
-                        subtitle: 'Ask for some actions',
-                        onTap: () => Navigator.of(context).push(
+                          borderRadius: BorderRadius.circular(28),
+                        ),
+                        child: _HubRow(
+                          icon: const Icon(Icons.tune_outlined, size: 28),
+                          label: 'Connector defaults',
+                          subtitle: 'Ask for some actions',
+                          onTap: () => Navigator.of(context).push(
                             MaterialPageRoute(
-                                builder: (_) =>
-                                    const ConnectorDefaultsScreen())),
+                              builder: (_) => const ConnectorDefaultsScreen(),
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
                     const SizedBox(height: 16),
                     Padding(
-                      padding:
-                          const EdgeInsets.fromLTRB(8, 20, 8, 8),
+                      padding: const EdgeInsets.fromLTRB(8, 20, 8, 8),
                       child: Row(
                         children: [
-                          const Text('Your account',
-                              style: TextStyle(
-                                  fontSize: 15,
-                                  color: Color(0xFF6F7278))),
-                          const Spacer()
+                          const Text(
+                            'Your account',
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: Color(0xFF6F7278),
+                            ),
+                          ),
+                          const Spacer(),
                         ],
                       ),
                     ),
                     Container(
                       decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(28)),
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(28),
+                      ),
                       child: _HubRow(
                         icon: SvgPicture.asset(
-                            'assets/icons/muse_avatar.svg',
-                            width: 28,
-                            height: 28),
+                          'assets/icons/muse_avatar.svg',
+                          width: 28,
+                          height: 28,
+                        ),
                         label: 'Accounts Center',
-                        subtitle:
-                            'Password, security, personal details',
+                        subtitle: 'Password, security, personal details',
                         onTap: null,
                       ),
                     ),
                     const SizedBox(height: 16),
                     Container(
                       decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(28)),
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(28),
+                      ),
                       child: InkWell(
                         onTap: () => _logoutDialog(context),
                         borderRadius: BorderRadius.circular(28),
                         child: const Padding(
                           padding: EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 18),
-                          child: Text('Log out',
-                              style: TextStyle(
-                                  fontSize: 17,
-                                  color: Color(0xFFD81E2E))),
+                            horizontal: 20,
+                            vertical: 18,
+                          ),
+                          child: Text(
+                            'Log out',
+                            style: TextStyle(
+                              fontSize: 17,
+                              color: Color(0xFFD81E2E),
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -335,11 +390,12 @@ class _HubRow extends StatelessWidget {
   final String label;
   final String? subtitle;
   final VoidCallback? onTap;
-  const _HubRow(
-      {required this.icon,
-      required this.label,
-      this.subtitle,
-      required this.onTap});
+  const _HubRow({
+    required this.icon,
+    required this.label,
+    this.subtitle,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -347,8 +403,7 @@ class _HubRow extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(28),
       child: Padding(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
         child: Row(
           children: [
             icon,
@@ -357,22 +412,29 @@ class _HubRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(label,
-                      style: const TextStyle(
-                          fontSize: 17, color: Colors.black)),
+                  Text(
+                    label,
+                    style: const TextStyle(fontSize: 17, color: Colors.black),
+                  ),
                   if (subtitle != null) ...[
                     const SizedBox(height: 2),
-                    Text(subtitle!,
-                        style: const TextStyle(
-                            fontSize: 14,
-                            color: Color(0xFF6F7278))),
+                    Text(
+                      subtitle!,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF6F7278),
+                      ),
+                    ),
                   ],
                 ],
               ),
             ),
             if (onTap != null)
-              const Icon(Icons.chevron_right,
-                  color: Color(0xFFC7C9D1), size: 24),
+              const Icon(
+                Icons.chevron_right,
+                color: Color(0xFFC7C9D1),
+                size: 24,
+              ),
           ],
         ),
       ),

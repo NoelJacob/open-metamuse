@@ -36,6 +36,7 @@ class AppState extends ChangeNotifier {
     goals.add(t);
     notifyListeners();
   }
+
   List<Map<String, dynamic>> connectorList = [];
   bool tosAccepted = false;
   bool gatewayError = false;
@@ -148,8 +149,10 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> sendMessage(String text,
-      {List<Map<String, dynamic>> attachments = const []}) async {
+  Future<void> sendMessage(
+    String text, {
+    List<Map<String, dynamic>> attachments = const [],
+  }) async {
     final tid = currentThreadId ?? 't1';
     currentThreadId = tid;
     final cards = <Map<String, dynamic>>[];
@@ -162,7 +165,8 @@ class AppState extends ChangeNotifier {
       cards.add({
         'kind': 'image',
         'title': (up['name'] ?? '').toString(),
-        'url': '/api/fs/raw?name=${Uri.encodeComponent((up['name'] ?? '').toString())}',
+        'url':
+            '/api/fs/raw?name=${Uri.encodeComponent((up['name'] ?? '').toString())}',
       });
     }
     final user = {
@@ -170,21 +174,20 @@ class AppState extends ChangeNotifier {
       'role': 'user',
       'text': text,
       'ts': DateTime.now().toUtc().toIso8601String(),
-      'cards': cards
+      'cards': cards,
     };
     messages.putIfAbsent(tid, () => []).add(user);
     notifyListeners();
     try {
       final m = await api.chatSend(tid, text);
-      messages[tid]!
-          .add(Map<String, dynamic>.from(m['message'] as Map));
+      messages[tid]!.add(Map<String, dynamic>.from(m['message'] as Map));
     } catch (_) {
       messages[tid]!.add({
         'id': 'a${DateTime.now().millisecondsSinceEpoch}',
         'role': 'agent',
         'text': text,
         'ts': DateTime.now().toUtc().toIso8601String(),
-        'cards': []
+        'cards': [],
       });
     }
     notifyListeners();
@@ -250,8 +253,7 @@ class AppState extends ChangeNotifier {
     } catch (_) {}
     try {
       final p = await api.viewerProfile();
-      userName =
-          ((p['user'] as Map?)?['name'] ?? 'Muse User').toString();
+      userName = ((p['user'] as Map?)?['name'] ?? 'Muse User').toString();
     } catch (_) {}
     try {
       final c = await api.connectors();

@@ -21,8 +21,8 @@ class FeedScreen extends StatelessWidget {
               leading: const Icon(Icons.share_outlined),
               title: const Text('Share'),
               onTap: () {
-                final text =
-                    '${u['title'] ?? ''}\n${u['subtitle'] ?? ''}'.trim();
+                final text = '${u['title'] ?? ''}\n${u['subtitle'] ?? ''}'
+                    .trim();
                 Navigator.pop(context);
                 Share.share(text);
               },
@@ -43,13 +43,17 @@ class FeedScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text((u['title'] ?? '').toString(),
-                  style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                (u['title'] ?? '').toString(),
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               const SizedBox(height: 8),
               Text((u['subtitle'] ?? '').toString()),
               const SizedBox(height: 8),
-              Text('Kind: ${(u['kind'] ?? '').toString()} • '
-                  'Status: active'),
+              Text(
+                'Kind: ${(u['kind'] ?? '').toString()} • '
+                'Status: active',
+              ),
             ],
           ),
         ),
@@ -68,20 +72,23 @@ class FeedScreen extends StatelessWidget {
             IconButton(
               tooltip: 'Settings',
               icon: const Icon(Icons.settings_outlined),
-              onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (_) => SettingsScreen(state: state))),
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => SettingsScreen(state: state)),
+              ),
             ),
           ],
         ),
         body: RefreshIndicator(
           onRefresh: state.loadFeed,
           child: state.feedUnits.isEmpty
-              ? ListView(children: const [
-                  Padding(
-                    padding: EdgeInsets.all(32),
-                    child: Center(child: Text('No feed units yet')),
-                  )
-                ])
+              ? ListView(
+                  children: const [
+                    Padding(
+                      padding: EdgeInsets.all(32),
+                      child: Center(child: Text('No feed units yet')),
+                    ),
+                  ],
+                )
               : ListView.builder(
                   padding: const EdgeInsets.all(12),
                   itemCount: state.feedUnits.length,
@@ -89,19 +96,16 @@ class FeedScreen extends StatelessWidget {
                     final u = state.feedUnits[i];
                     return Card(
                       child: ListTile(
-                        title:
-                            Text((u['title'] ?? '').toString()),
-                        subtitle:
-                            Text((u['subtitle'] ?? '').toString()),
+                        title: Text((u['title'] ?? '').toString()),
+                        subtitle: Text((u['subtitle'] ?? '').toString()),
                         leading: Chip(
-                            label: Text((u['kind'] ?? '').toString())),
+                          label: Text((u['kind'] ?? '').toString()),
+                        ),
                         onTap: () => _statusSheet(context, u),
                         trailing: IconButton(
                           tooltip: 'Share',
-                          icon:
-                              const Icon(Icons.share_outlined),
-                          onPressed: () =>
-                              _shareSheet(context, u),
+                          icon: const Icon(Icons.share_outlined),
+                          onPressed: () => _shareSheet(context, u),
                         ),
                       ),
                     );

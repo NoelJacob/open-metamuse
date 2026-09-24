@@ -8,8 +8,11 @@ import 'state.dart';
 class GateErrorScreen extends StatelessWidget {
   final AppState state;
   final bool showGear;
-  const GateErrorScreen(
-      {super.key, required this.state, required this.showGear});
+  const GateErrorScreen({
+    super.key,
+    required this.state,
+    required this.showGear,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -28,20 +31,25 @@ class GateErrorScreen extends StatelessWidget {
                           width: 20,
                           height: 20,
                           child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Color(0xFF6F7278)))
+                            strokeWidth: 2,
+                            color: Color(0xFF6F7278),
+                          ),
+                        )
                       : const SizedBox(
                           width: 72,
                           height: 72,
                           child: CircularProgressIndicator(
-                              strokeWidth: 7,
-                              color: Color(0xFF0064E0))),
+                            strokeWidth: 7,
+                            color: Color(0xFF0064E0),
+                          ),
+                        ),
                 ),
                 const SizedBox(height: 28),
-                const Text('Something went wrong. Please try again.',
-                    textAlign: TextAlign.center,
-                    style:
-                        TextStyle(fontSize: 16, color: Color(0xFF6F7278))),
+                const Text(
+                  'Something went wrong. Please try again.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16, color: Color(0xFF6F7278)),
+                ),
                 const Spacer(flex: 4),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -51,14 +59,16 @@ class GateErrorScreen extends StatelessWidget {
                       onPressed: null,
                       style: FilledButton.styleFrom(
                         shape: const StadiumBorder(),
-                        disabledBackgroundColor:
-                            const Color(0xFFF0F1F5),
+                        disabledBackgroundColor: const Color(0xFFF0F1F5),
                       ),
-                      child: const Text('Try again',
-                          style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black)),
+                      child: const Text(
+                        'Try again',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -70,9 +80,11 @@ class GateErrorScreen extends StatelessWidget {
                 top: 8,
                 right: 16,
                 child: InkWell(
-                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) =>
-                          SettingsScreen(state: state))),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => SettingsScreen(state: state),
+                    ),
+                  ),
                   customBorder: const CircleBorder(),
                   child: Container(
                     width: 48,
@@ -80,11 +92,16 @@ class GateErrorScreen extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                          color: const Color(0xFFE2E3E8), width: 1.5),
+                        color: const Color(0xFFE2E3E8),
+                        width: 1.5,
+                      ),
                     ),
                     child: Center(
-                      child: SvgPicture.asset('assets/icons/muse_gear.svg',
-                          width: 24, height: 24),
+                      child: SvgPicture.asset(
+                        'assets/icons/muse_gear.svg',
+                        width: 24,
+                        height: 24,
+                      ),
                     ),
                   ),
                 ),
