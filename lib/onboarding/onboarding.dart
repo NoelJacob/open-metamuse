@@ -1,12 +1,13 @@
 import 'package:flutter/gestures.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
-import 'api.dart';
-import 'settings.dart';
-import 'state.dart';
+import '../api.dart';
+import '../icons/muse.dart';
+import '../internal/state.dart';
+import '../settings.dart';
+import '../theme.dart';
+import 'landing.dart';
 
-// ponytail: one widget, int step; no router/pages.
 class OnboardingFlow extends StatefulWidget {
   final AppState state;
   const OnboardingFlow({super.key, required this.state});
@@ -68,149 +69,17 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     );
   }
 
-  // ponytail: pixel port of Aura logged-out landing (hatch_logo vector, pill field).
-  Widget _landing() {
-    final ready = _phone.text.trim().isNotEmpty;
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 48),
-                  Center(
-                    child: SvgPicture.asset(
-                      'assets/icons/muse_logo.svg',
-                      width: 84,
-                      height: 84,
-                    ),
-                  ),
-                  const SizedBox(height: 28),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8),
-                    child: Text(
-                      'Welcome to Muse',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 34,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.black,
-                        height: 1.02,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  TextField(
-                    controller: _phone,
-                    keyboardType: TextInputType.emailAddress,
-                    onChanged: (_) => setState(() {}),
-                    style: const TextStyle(fontSize: 17, color: Colors.black),
-                    decoration: InputDecoration(
-                      isDense: true,
-                      hintText: 'Mobile number or email',
-                      hintStyle: const TextStyle(
-                        fontSize: 17,
-                        color: Color(0xFF9AA0A6),
-                      ),
-                      filled: true,
-                      fillColor: const Color(0xFFF0F1F5),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 14,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(31),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const SizedBox(
-                    width: double.infinity,
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8),
-                      child: _SmsNotice(),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    height: 48,
-                    child: FilledButton(
-                      onPressed: ready && !_busy
-                          ? () => _run(() async {
-                              await _s.startPhone(_phone.text.trim());
-                              setState(() => _step = 2);
-                            })
-                          : null,
-                      style: FilledButton.styleFrom(
-                        shape: const StadiumBorder(),
-                        backgroundColor: const Color(0xFF0064E0),
-                        disabledBackgroundColor: const Color(0xFFB4CFFC),
-                      ),
-                      child: _busy
-                          ? const SizedBox(
-                              width: 22,
-                              height: 22,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Text(
-                              'Continue',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
-                    ),
-                  ),
-                  if (_error != null) ...[
-                    const SizedBox(height: 12),
-                    Text(
-                      _error!,
-                      style: const TextStyle(color: Colors.red, fontSize: 13),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            Positioned(
-              top: 8,
-              right: 16,
-              child: InkWell(
-                onTap: _loggedOutSettings,
-                customBorder: const CircleBorder(),
-                child: Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: const Color(0xFFE2E3E8),
-                      width: 1.5,
-                    ),
-                  ),
-                  child: Center(
-                    child: SvgPicture.asset(
-                      'assets/icons/muse_gear.svg',
-                      width: 24,
-                      height: 24,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget _landing() => Landing(
+    phone: _phone,
+    busy: _busy,
+    error: _error,
+    onPhoneChanged: () => setState(() {}),
+    onContinue: () => _run(() async {
+      await _s.startPhone(_phone.text.trim());
+      setState(() => _step = 2);
+    }),
+    onOpenSettings: _loggedOutSettings,
+  );
 
   void _loggedOutSettings() {
     Navigator.of(context)
@@ -218,6 +87,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   }
 
   Widget _body() {
+    final cs = Theme.of(context).colorScheme;
     switch (_step) {
       case 1:
         return _frame('Enter your phone number', [
@@ -254,7 +124,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
         ]);
       default:
         return _frame('Welcome to Muse', [
-          const Icon(Icons.chat_bubble, size: 64, color: Color(0xFF5890FF)),
+          Icon(Icons.chat_bubble, size: 64, color: cs.secondary),
           _go('Get started', () async {
             _s.beginOnboarding();
             await _run(() => _s.loadHub());
@@ -266,12 +136,13 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
 
   // ponytail: port of NativeLoginOtpScreen (code cells + Confirm + Try another way).
   Widget _otpPage() {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final id = _phone.text.trim().isEmpty ? 'your phone' : _phone.text.trim();
     return Scaffold(
-      backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          // padding: const EdgeInsets.symmetric(horizontal: 0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -285,10 +156,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                     height: 48,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(
-                        color: const Color(0xFFE2E3E8),
-                        width: 1.5,
-                      ),
+                      border: Border.all(color: cs.outline, width: 1.5),
                     ),
                     child: const Icon(Icons.arrow_back, size: 22),
                   ),
@@ -296,28 +164,19 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
               ),
               const SizedBox(height: 8),
               Center(
-                child: SvgPicture.asset(
-                  'assets/icons/muse_logo.svg',
-                  width: 64,
-                  height: 64,
-                  colorFilter: const ColorFilter.mode(
-                    Color(0xFF0064E0),
-                    BlendMode.srcIn,
-                  ),
+                child: MuseIcon(
+                  MuseIconAsset.logo,
+                  size: 64,
+                  color: cs.secondary,
                 ),
               ),
               const SizedBox(height: 20),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Text(
                   'Enter your code',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.black,
-                    height: 1.1,
-                  ),
+                  style: tt.displayMedium,
                 ),
               ),
               const SizedBox(height: 12),
@@ -326,11 +185,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                 child: RichText(
                   textAlign: TextAlign.center,
                   text: TextSpan(
-                    style: const TextStyle(
-                      fontSize: 15,
-                      color: Color(0xFF6F7278),
-                      height: 1.35,
-                    ),
+                    style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant),
                     children: [
                       TextSpan(
                         text:
@@ -338,7 +193,9 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                       ),
                       TextSpan(
                         text: 'Resend code',
-                        style: const TextStyle(color: Color(0xFF0064E0)),
+                        style: tt.bodySmall!.copyWith(
+                          color: MusePalette.linkLight,
+                        ),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () =>
                               _run(() => _s.startPhone(_phone.text.trim())),
@@ -377,28 +234,16 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                               await _s.bootstrap();
                             });
                           },
-                    style: FilledButton.styleFrom(
-                      shape: const StadiumBorder(),
-                      backgroundColor: const Color(0xFF0064E0),
-                      disabledBackgroundColor: const Color(0xFFB4CFFC),
-                    ),
                     child: _busy
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 22,
                             height: 22,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: Colors.white,
+                              color: cs.onPrimary,
                             ),
                           )
-                        : const Text(
-                            'Confirm',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
-                          ),
+                        : Text('Confirm', style: tt.labelLarge),
                   ),
                 ),
               ),
@@ -408,10 +253,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Text(
                     _error!,
-                    style: const TextStyle(
-                      color: Color(0xFFD93025),
-                      fontSize: 13,
-                    ),
+                    style: tt.labelSmall!.copyWith(color: cs.error),
                   ),
                 ),
               ],
@@ -431,7 +273,11 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
         const SizedBox(height: 16),
         for (final k in kids) ...[k, const SizedBox(height: 12)],
         if (_error != null)
-          Text(_error!, style: const TextStyle(color: Colors.red)),
+          Text(
+            _error!,
+            style: Theme.of(context).textTheme.labelSmall!
+                .copyWith(color: Theme.of(context).colorScheme.error),
+          ),
       ],
     );
   }
@@ -446,20 +292,18 @@ class _SmsNotice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
     return RichText(
       text: TextSpan(
-        style: const TextStyle(
-          fontSize: 13,
-          color: Color(0xFF6F7278),
-          height: 1.2,
-        ),
+        style: tt.labelSmall,
         children: [
-          const TextSpan(
+          TextSpan(
             text: 'You may receive SMS notifications from us by using your mobile number. ',
           ),
-          const TextSpan(
+          TextSpan(
             text: 'Learn more',
-            style: TextStyle(color: Color(0xFF0064E0)),
+            style: tt.labelSmall!.copyWith(color: cs.secondary),
           ),
         ],
       ),
@@ -528,15 +372,11 @@ class _OtpBoxesState extends State<_OtpBoxes> {
                 textAlign: TextAlign.center,
                 keyboardType: TextInputType.number,
                 maxLength: 6,
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black,
-                ),
+                style: Theme.of(context).textTheme.headlineMedium,
                 decoration: InputDecoration(
                   counterText: '',
                   filled: true,
-                  fillColor: const Color(0xFFF0F1F5),
+                  fillColor: Theme.of(context).colorScheme.surfaceContainerHigh,
                   contentPadding: EdgeInsets.zero,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -544,8 +384,8 @@ class _OtpBoxesState extends State<_OtpBoxes> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(
-                      color: Color(0xFF0064E0),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.primary,
                       width: 2,
                     ),
                   ),
