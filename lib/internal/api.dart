@@ -17,13 +17,14 @@ class ApiClient {
   String? accessToken;
 
   ApiClient({
-    this.baseUrl = 'http://localhost:8787',
+    this.baseUrl = 'http://localhost:5173',
     this.timeout = const Duration(seconds: 5),
+    this.accessToken,
   });
 
   Map<String, String> get _headers => {
     'content-type': 'application/json',
-    'authorization': 'Bearer $accessToken',
+    if (accessToken != null) 'authorization': 'Bearer $accessToken',
   };
 
   Map<String, dynamic> _decode(int status, String body) {

@@ -1,6 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
-import 'api.dart';
+import 'internal/api.dart';
 
 // ponytail: one ChangeNotifier holds gate + lists; no providers/get_it.
 enum SessionStage { loggedOut, onboarding, activation, main }

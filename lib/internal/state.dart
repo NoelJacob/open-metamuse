@@ -4,7 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../api.dart';
+import 'api.dart';
 
 Future<String?> _getStringSafe(SharedPreferencesAsync prefs, String key) async {
   try {
@@ -17,7 +17,7 @@ Future<String?> _getStringSafe(SharedPreferencesAsync prefs, String key) async {
 enum SessionStage { loggedIn, welcome }
 
 class AppState {
-  final ApiClient api = ApiClient();
+  final ApiClient api;
   final SharedPreferencesAsync prefs;
   final FlutterSecureStorage secure;
 
@@ -26,6 +26,7 @@ class AppState {
   late final ValueNotifier<SessionStage> sessionStage;
 
   AppState({
+    required this.api,
     required this.prefs,
     required this.secure,
     required ThemeMode themeMode,
@@ -45,11 +46,16 @@ class AppState {
       await _getStringSafe(prefs, 'themeMode') ?? ThemeMode.light.name,
     );
     final String? userId = await secure.read(key: 'userId');
-    final SessionStage sessionStage = SessionStage.values.byName(
-      await _getStringSafe(prefs, 'sessionStage') ?? SessionStage.welcome.name,
-    );
+    final String? accessToken = await secure.read(key: 'accessToken');
+    SessionStage sessionStage = .welcome;
+    if (accessToken != null) {
+      sessionStage = SessionStage.loggedIn;
+    }
+
+    final ApiClient apiClient = ApiClient(accessToken: accessToken);
 
     return AppState(
+      api: apiClient,
       prefs: prefs,
       secure: secure,
       themeMode: themeMode,

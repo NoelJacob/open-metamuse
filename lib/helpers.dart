@@ -1,6 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
-import 'api.dart';
+import 'internal/api.dart';
 
 mixin RunAsync<T extends StatefulWidget> on State<T> {
   bool _busy = false;
