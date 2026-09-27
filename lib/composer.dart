@@ -53,6 +53,21 @@ class _ComposerBarState extends State<ComposerBar> {
         _replyTo = null;
         _picked.clear();
       });
+    } catch (e) {
+      if (!mounted) return;
+      await showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Send failed'),
+          content: Text(e.toString()),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
     } finally {
       if (mounted) setState(() => _sending = false);
     }
@@ -60,6 +75,8 @@ class _ComposerBarState extends State<ComposerBar> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     const hint = 'Message';
     return SafeArea(
       top: false,
@@ -77,19 +94,13 @@ class _ComposerBarState extends State<ComposerBar> {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF0F1F5),
+                  color: cs.surfaceContainerHigh,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Row(
                   children: [
-                    const Expanded(
-                      child: Text(
-                        'Replying to Muse',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Color(0xFF6F7278),
-                        ),
-                      ),
+                    Expanded(
+                      child: Text('Replying to Muse', style: tt.labelSmall),
                     ),
                     GestureDetector(
                       onTap: () => setState(() => _replyTo = null),
@@ -118,14 +129,14 @@ class _ComposerBarState extends State<ComposerBar> {
             Container(
               height: 48,
               decoration: BoxDecoration(
-                color: const Color(0xFFF0F1F5),
+                color: cs.surfaceContainerHigh,
                 borderRadius: BorderRadius.circular(24),
               ),
               child: Row(
                 children: [
                   IconButton(
                     tooltip: 'Attach',
-                    icon: const Icon(Icons.add, color: Colors.black),
+                    icon: Icon(Icons.add, color: cs.onSurface),
                     onPressed: () {
                       final box = context.findRenderObject() as RenderBox?;
                       final pos = box == null
@@ -204,17 +215,11 @@ class _ComposerBarState extends State<ComposerBar> {
                       textInputAction: TextInputAction.send,
                       onChanged: (_) => setState(() {}),
                       onSubmitted: (_) => _send(),
-                      style: const TextStyle(fontSize: 17, color: Colors.black),
-                      decoration: InputDecoration(
+                      style: tt.bodyLarge,
+                      decoration: const InputDecoration(
                         hintText: hint,
-                        hintStyle: const TextStyle(
-                          fontSize: 17,
-                          color: Color(0xFF9AA0A6),
-                        ),
                         border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 12,
-                        ),
+                        contentPadding: EdgeInsets.symmetric(vertical: 12),
                       ),
                     ),
                   ),
@@ -231,15 +236,15 @@ class _ComposerBarState extends State<ComposerBar> {
                         : Container(
                             width: 48,
                             height: 48,
-                            decoration: const BoxDecoration(
-                              color: Colors.black,
+                            decoration: BoxDecoration(
+                              color: cs.primary,
                               shape: BoxShape.circle,
                             ),
                             child: IconButton(
                               tooltip: 'Send',
-                              icon: const Icon(
+                              icon: Icon(
                                 Icons.arrow_upward,
-                                color: Colors.white,
+                                color: cs.onPrimary,
                               ),
                               onPressed: _send,
                             ),
@@ -247,7 +252,7 @@ class _ComposerBarState extends State<ComposerBar> {
                   else
                     IconButton(
                       tooltip: 'Mic',
-                      icon: const Icon(Icons.mic_none, color: Colors.black),
+                      icon: Icon(Icons.mic_none, color: cs.onSurface),
                       onPressed: () async {
                         final status = await Permission.microphone.request();
                         if (!context.mounted) return;
@@ -277,10 +282,7 @@ class _ComposerBarState extends State<ComposerBar> {
                                         ? 'Microphone access denied'
                                         : 'Voice input',
                                     textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w700,
-                                    ),
+                                    style: tt.headlineSmall,
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
@@ -288,9 +290,8 @@ class _ComposerBarState extends State<ComposerBar> {
                                         ? 'Microphone access has been denied. Please enable it in Settings to use voice features.'
                                         : 'Listening… speak now. Voice transcription has no offline fixture.',
                                     textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      fontSize: 15,
-                                      color: Color(0xFF6F7278),
+                                    style: tt.bodySmall?.copyWith(
+                                      color: cs.onSurfaceVariant,
                                     ),
                                   ),
                                   const SizedBox(height: 20),
@@ -301,40 +302,21 @@ class _ComposerBarState extends State<ComposerBar> {
                                         onPressed: () async {
                                           await openAppSettings();
                                         },
-                                        style: FilledButton.styleFrom(
-                                          shape: const StadiumBorder(),
-                                          backgroundColor: const Color(
-                                            0xFF0064E0,
-                                          ),
-                                        ),
-                                        child: const Text(
+
+                                        child: Text(
                                           'Open settings',
-                                          style: TextStyle(
-                                            fontSize: 17,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.white,
-                                          ),
+                                          style: tt.labelLarge,
                                         ),
                                       ),
                                     ),
                                   if (denied) const SizedBox(height: 4),
                                   SizedBox(
                                     height: 48,
-                                    child: FilledButton(
+                                    child: FilledButton.tonal(
                                       onPressed: () => Navigator.pop(context),
-                                      style: FilledButton.styleFrom(
-                                        shape: const StadiumBorder(),
-                                        backgroundColor: const Color(
-                                          0xFFF0F1F5,
-                                        ),
-                                      ),
                                       child: Text(
                                         denied ? 'Cancel' : 'Close',
-                                        style: const TextStyle(
-                                          fontSize: 17,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.black,
-                                        ),
+                                        style: tt.labelLarge,
                                       ),
                                     ),
                                   ),

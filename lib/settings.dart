@@ -1,6 +1,6 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
+import 'icons/muse.dart';
 import 'settings_pages.dart';
 import 'state.dart';
 
@@ -9,11 +9,13 @@ class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key, required this.state});
 
   void _logoutDialog(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     showDialog<void>(
       context: context,
-      barrierColor: Colors.black54,
+      barrierColor: cs.scrim,
       builder: (d) => Dialog(
-        backgroundColor: Colors.white,
+        backgroundColor: cs.surfaceContainerLow,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
@@ -21,20 +23,16 @@ class SettingsScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
+              Text(
                 'Log out',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.black,
-                ),
+                style: tt.headlineSmall,
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 'Are you sure you want to log out?',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Color(0xFF6F7278)),
+                style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
               ),
               const SizedBox(height: 20),
               SizedBox(
@@ -45,27 +43,17 @@ class SettingsScreen extends StatelessWidget {
                     state.signOut();
                     Navigator.of(context).popUntil((r) => r.isFirst);
                   },
-                  style: FilledButton.styleFrom(
-                    shape: const StadiumBorder(),
-                    backgroundColor: const Color(0xFFD81E2E),
-                  ),
-                  child: const Text(
+                  style: FilledButton.styleFrom(backgroundColor: cs.error),
+                  child: Text(
                     'Log out',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
+                    style: tt.titleMedium?.copyWith(color: cs.onError),
                   ),
                 ),
               ),
               const SizedBox(height: 4),
               TextButton(
                 onPressed: () => Navigator.of(d).pop(),
-                child: const Text(
-                  'Cancel',
-                  style: TextStyle(fontSize: 17, color: Colors.black),
-                ),
+                child: Text('Cancel', style: tt.bodyLarge),
               ),
             ],
           ),
@@ -78,8 +66,10 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // ponytail: logged-out hub shows only Help/Legal/Account/Logout.
     final loggedOut = state.stage != SessionStage.main;
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     return Scaffold(
-      backgroundColor: const Color(0xFFF0F1F5),
+      backgroundColor: cs.surface,
       body: SafeArea(
         child: Column(
           children: [
@@ -96,25 +86,15 @@ class SettingsScreen extends StatelessWidget {
                       child: Container(
                         width: 48,
                         height: 48,
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.white,
+                          color: cs.surfaceContainerLow,
                         ),
-                        child: const Icon(
-                          Icons.arrow_back,
-                          color: Colors.black,
-                        ),
+                        child: Icon(Icons.arrow_back, color: cs.onSurface),
                       ),
                     ),
                   ),
-                  const Text(
-                    'Settings',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black,
-                    ),
-                  ),
+                  Text('Settings', style: tt.headlineSmall),
                 ],
               ),
             ),
@@ -126,7 +106,7 @@ class SettingsScreen extends StatelessWidget {
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: cs.surfaceContainerLow,
                         borderRadius: BorderRadius.circular(28),
                       ),
                       child: Column(
@@ -147,10 +127,7 @@ class SettingsScreen extends StatelessWidget {
                           if (!loggedOut)
                             const Padding(
                               padding: EdgeInsets.symmetric(horizontal: 20),
-                              child: Divider(
-                                height: 1,
-                                color: Color(0xFFE8E9ED),
-                              ),
+                              child: Divider(height: 1),
                             ),
                           if (!loggedOut)
                             _HubRow(
@@ -168,10 +145,7 @@ class SettingsScreen extends StatelessWidget {
                           if (!loggedOut)
                             const Padding(
                               padding: EdgeInsets.symmetric(horizontal: 20),
-                              child: Divider(
-                                height: 1,
-                                color: Color(0xFFE8E9ED),
-                              ),
+                              child: Divider(height: 1),
                             ),
                           if (!loggedOut)
                             _HubRow(
@@ -187,10 +161,7 @@ class SettingsScreen extends StatelessWidget {
                           if (!loggedOut)
                             const Padding(
                               padding: EdgeInsets.symmetric(horizontal: 20),
-                              child: Divider(
-                                height: 1,
-                                color: Color(0xFFE8E9ED),
-                              ),
+                              child: Divider(height: 1),
                             ),
                           if (!loggedOut)
                             _HubRow(
@@ -205,10 +176,7 @@ class SettingsScreen extends StatelessWidget {
                           if (!loggedOut)
                             const Padding(
                               padding: EdgeInsets.symmetric(horizontal: 20),
-                              child: Divider(
-                                height: 1,
-                                color: Color(0xFFE8E9ED),
-                              ),
+                              child: Divider(height: 1),
                             ),
                           if (!loggedOut)
                             _HubRow(
@@ -227,10 +195,7 @@ class SettingsScreen extends StatelessWidget {
                           if (!loggedOut)
                             const Padding(
                               padding: EdgeInsets.symmetric(horizontal: 20),
-                              child: Divider(
-                                height: 1,
-                                color: Color(0xFFE8E9ED),
-                              ),
+                              child: Divider(height: 1),
                             ),
                           if (!loggedOut)
                             _HubRow(
@@ -245,10 +210,7 @@ class SettingsScreen extends StatelessWidget {
                           if (!loggedOut)
                             const Padding(
                               padding: EdgeInsets.symmetric(horizontal: 20),
-                              child: Divider(
-                                height: 1,
-                                color: Color(0xFFE8E9ED),
-                              ),
+                              child: Divider(height: 1),
                             ),
                           if (!loggedOut)
                             _HubRow(
@@ -263,17 +225,10 @@ class SettingsScreen extends StatelessWidget {
                           if (!loggedOut)
                             const Padding(
                               padding: EdgeInsets.symmetric(horizontal: 20),
-                              child: Divider(
-                                height: 1,
-                                color: Color(0xFFE8E9ED),
-                              ),
+                              child: Divider(height: 1),
                             ),
                           _HubRow(
-                            icon: SvgPicture.asset(
-                              'assets/icons/muse_help.svg',
-                              width: 28,
-                              height: 28,
-                            ),
+                            icon: MuseIcon(MuseIconAsset.help, size: 28),
                             label: 'Help & support',
                             onTap: () => Navigator.of(context).push(
                               MaterialPageRoute(
@@ -283,14 +238,10 @@ class SettingsScreen extends StatelessWidget {
                           ),
                           const Padding(
                             padding: EdgeInsets.symmetric(horizontal: 20),
-                            child: Divider(height: 1, color: Color(0xFFE8E9ED)),
+                            child: Divider(height: 1),
                           ),
                           _HubRow(
-                            icon: SvgPicture.asset(
-                              'assets/icons/muse_shield_small.svg',
-                              width: 28,
-                              height: 28,
-                            ),
+                            icon: MuseIcon(MuseIconAsset.shieldSmall, size: 28),
                             label: 'Legal info',
                             onTap: () => Navigator.of(context).push(
                               MaterialPageRoute(
@@ -304,7 +255,7 @@ class SettingsScreen extends StatelessWidget {
                     if (!loggedOut)
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: cs.surfaceContainerLow,
                           borderRadius: BorderRadius.circular(28),
                         ),
                         child: _HubRow(
@@ -323,11 +274,10 @@ class SettingsScreen extends StatelessWidget {
                       padding: const EdgeInsets.fromLTRB(8, 20, 8, 8),
                       child: Row(
                         children: [
-                          const Text(
+                          Text(
                             'Your account',
-                            style: TextStyle(
-                              fontSize: 15,
-                              color: Color(0xFF6F7278),
+                            style: tt.bodySmall?.copyWith(
+                              color: cs.onSurfaceVariant,
                             ),
                           ),
                           const Spacer(),
@@ -336,14 +286,14 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: cs.surfaceContainerLow,
                         borderRadius: BorderRadius.circular(28),
                       ),
                       child: _HubRow(
-                        icon: SvgPicture.asset(
-                          'assets/icons/muse_avatar.svg',
-                          width: 28,
-                          height: 28,
+                        icon: MuseIcon(
+                          MuseIconAsset.avatar,
+                          size: 28,
+                          color: cs.onSurface,
                         ),
                         label: 'Accounts Center',
                         subtitle: 'Password, security, personal details',
@@ -353,23 +303,20 @@ class SettingsScreen extends StatelessWidget {
                     const SizedBox(height: 16),
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: cs.surfaceContainerLow,
                         borderRadius: BorderRadius.circular(28),
                       ),
                       child: InkWell(
                         onTap: () => _logoutDialog(context),
                         borderRadius: BorderRadius.circular(28),
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
                             horizontal: 20,
                             vertical: 18,
                           ),
                           child: Text(
                             'Log out',
-                            style: TextStyle(
-                              fontSize: 17,
-                              color: Color(0xFFD81E2E),
-                            ),
+                            style: tt.titleMedium?.copyWith(color: cs.error),
                           ),
                         ),
                       ),
@@ -399,6 +346,8 @@ class _HubRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(28),
@@ -412,29 +361,16 @@ class _HubRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    label,
-                    style: const TextStyle(fontSize: 17, color: Colors.black),
-                  ),
+                  Text(label, style: tt.titleMedium),
                   if (subtitle != null) ...[
                     const SizedBox(height: 2),
-                    Text(
-                      subtitle!,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF6F7278),
-                      ),
-                    ),
+                    Text(subtitle!, style: tt.labelMedium),
                   ],
                 ],
               ),
             ),
             if (onTap != null)
-              const Icon(
-                Icons.chevron_right,
-                color: Color(0xFFC7C9D1),
-                size: 24,
-              ),
+              Icon(Icons.chevron_right, color: cs.outline, size: 24),
           ],
         ),
       ),

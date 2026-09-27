@@ -1,19 +1,4 @@
 #!/usr/bin/env python3
-"""Single backend for the Flutter clone: fixture HTTP on :8787.
-
-Does for the Flutter app what `backend.py orig` mode does for the original:
-one command serves everything the app needs. stdlib only.
-
-Usage:
-  python3 flutter-backend.py [port]   # default 8787
-
-Data ownership (see also the header of backend.py): this file owns
-everything under server/data/ today — threads.json, messages.json,
-feed.json, connectors.json, profile.json, demo.jpg, paris-weekend.md,
-paris-weekend.pdf. backend.py owns no data files (all orig demo content is
-inline Jarvis shapes). New files get a `flutter-` or `orig-` prefix per
-sole consumer; shared-by-both files keep bare names.
-"""
 import base64
 import json
 import os

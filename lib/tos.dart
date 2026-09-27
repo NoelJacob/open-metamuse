@@ -1,6 +1,6 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
+import 'icons/muse.dart';
 import 'settings.dart';
 import 'state.dart';
 
@@ -18,17 +18,17 @@ class _TosScreenState extends State<TosScreen> {
 
   static const _rows = [
     (
-      'assets/icons/muse_shield_check.svg',
+      MuseIconAsset.shieldCheck,
       'Can take actions for you',
       "With your approval, your agent can send messages, edit files, make purchases, and take actions in apps you've connected. You control what it can access in Settings.",
     ),
     (
-      'assets/icons/muse_clock.svg',
+      MuseIconAsset.clock,
       'Works around the clock',
       'Your agent can continue working on tasks after you close the app. Check in to keep it on track and intervene if needed.',
     ),
     (
-      'assets/icons/muse_eye.svg',
+      MuseIconAsset.eye,
       'Smart, but still learning',
       "It may make mistakes or take unexpected actions. It's built to ask before taking sensitive actions, but supervision is recommended.",
     ),
@@ -47,8 +47,9 @@ class _TosScreenState extends State<TosScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     return Scaffold(
-      backgroundColor: Colors.white,
       body: SafeArea(
         child: Stack(
           children: [
@@ -63,49 +64,35 @@ class _TosScreenState extends State<TosScreen> {
                       children: [
                         const SizedBox(height: 64),
                         Center(
-                          child: SvgPicture.asset(
-                            'assets/icons/muse_logo.svg',
-                            width: 76,
-                            height: 76,
+                          child: MuseIcon(
+                            MuseIconAsset.logo,
+                            size: 76,
+                            color: cs.onSurface,
                           ),
                         ),
                         const SizedBox(height: 24),
-                        const Text(
+                        Text(
                           'Before you get started',
                           textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 30,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.black,
-                            height: 1.1,
-                          ),
+                          style: tt.displayMedium,
                         ),
                         const SizedBox(height: 28),
                         for (final (icon, title, body) in _rows) ...[
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              SvgPicture.asset(icon, width: 28, height: 28),
+                              MuseIcon(icon, size: 28),
                               const SizedBox(width: 16),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      title,
-                                      style: const TextStyle(
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.w700,
-                                        color: Colors.black,
-                                      ),
-                                    ),
+                                    Text(title, style: tt.titleMedium),
                                     const SizedBox(height: 4),
                                     Text(
                                       body,
-                                      style: const TextStyle(
-                                        fontSize: 15,
-                                        color: Color(0xFF6F7278),
-                                        height: 1.35,
+                                      style: tt.bodySmall!.copyWith(
+                                        color: cs.onSurfaceVariant,
                                       ),
                                     ),
                                   ],
@@ -122,31 +109,27 @@ class _TosScreenState extends State<TosScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: RichText(
-                    text: const TextSpan(
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Color(0xFF6F7278),
-                        height: 1.4,
-                      ),
+                    text: TextSpan(
+                      style: tt.labelSmall,
                       children: [
                         TextSpan(
                           text: 'By using this product, you agree to the ',
                         ),
                         TextSpan(
                           text: 'Muse Terms',
-                          style: TextStyle(color: Color(0xFF0064E0)),
+                          style: tt.labelSmall!.copyWith(color: cs.secondary),
                         ),
                         TextSpan(
                           text: ', which contains important information about your rights and responsibilities. Muse is subject to ',
                         ),
                         TextSpan(
                           text: "Meta's AI Terms",
-                          style: TextStyle(color: Color(0xFF0064E0)),
+                          style: tt.labelSmall!.copyWith(color: cs.secondary),
                         ),
                         TextSpan(text: ' and the '),
                         TextSpan(
                           text: 'Meta Privacy Policy',
-                          style: TextStyle(color: Color(0xFF0064E0)),
+                          style: tt.labelSmall!.copyWith(color: cs.secondary),
                         ),
                         TextSpan(text: '.'),
                       ],
@@ -160,28 +143,16 @@ class _TosScreenState extends State<TosScreen> {
                     height: 56,
                     child: FilledButton(
                       onPressed: _busy ? null : _continue,
-                      style: FilledButton.styleFrom(
-                        shape: const StadiumBorder(),
-                        backgroundColor: const Color(0xFF0064E0),
-                        disabledBackgroundColor: const Color(0xFFB4CFFC),
-                      ),
                       child: _busy
-                          ? const SizedBox(
+                          ? SizedBox(
                               width: 24,
                               height: 24,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: Colors.white,
+                                color: cs.onPrimary,
                               ),
                             )
-                          : const Text(
-                              'Continue',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
+                          : Text('Continue', style: tt.labelLarge),
                     ),
                   ),
                 ),
@@ -203,18 +174,9 @@ class _TosScreenState extends State<TosScreen> {
                   height: 48,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(
-                      color: const Color(0xFFE2E3E8),
-                      width: 1.5,
-                    ),
+                    border: Border.all(color: cs.outline, width: 1.5),
                   ),
-                  child: Center(
-                    child: SvgPicture.asset(
-                      'assets/icons/muse_gear.svg',
-                      width: 24,
-                      height: 24,
-                    ),
-                  ),
+                  child: Center(child: MuseIcon(MuseIconAsset.gear, size: 24)),
                 ),
               ),
             ),

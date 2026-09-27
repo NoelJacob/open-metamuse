@@ -62,7 +62,7 @@ No fixes proposed. Clock/keyboard/scroll contamination is noted, never scored.
 | E1 | Clone `_accounts` (u1 `Muse User`, u2 `Work Profile`) needs real APK account data | CONTRADICTED | Clone list is a stub for the offline `select_account` contract (`server/backend.py` fixture mode, `lib/api.dart`); the original skips account selection offline (`account_selection_required: False`), so no original account structure exists to copy |
 | E2 | Clone needs a real tab-bar mapping review | CONTRADICTED | Clone already carries copied APK vectors and black selected tint (`lib/theme.dart` `MuseTabIcons`, `lib/shell.dart` `_TabCell`); original dump confirms icon-only row plus selected states |
 | E3 | OTP field content / status-bar clocks / scroll position / keyboard visibility as parity failures | CONTRADICTED | Contamination to control, per plan; scores reuse masked pairs only |
-| E4 | Clone has no Pin screen / ToS accept path | CONTRADICTED | `lib/onboarding.dart` step 7 PIN plus `completePin`, `TosScreen` accept call exist and were driven in the funnel |
+| E4 | Clone has no Pin screen / ToS accept path | CONTRADICTED | `../lib/welcome` step 7 PIN plus `completePin`, `TosScreen` accept call exist and were driven in the funnel |
 
 ## F. Future work — unscored on-disk pairs (no scores invented)
 
@@ -127,7 +127,7 @@ Baselines still reproduce after the stub work: landing 0.934/1.54%, OTP 0.836/8.
 | Row | Backing in `lib/` | Verdict |
 |---|---|---|
 | F1 ToS post-OTP | `TosScreen` (`lib/tos.dart`) renders rows + links + Continue | IMPLEMENTED |
-| F2 Post-OTP transition | No transition frame widget; `OnboardingFlow` jumps activation→main | NOT IMPLEMENTED (`lib/onboarding.dart`: no transition state) |
+| F2 Post-OTP transition | No transition frame widget; `OnboardingFlow` jumps activation→main | NOT IMPLEMENTED (`../lib/welcome`: no transition state) |
 | F3 Try-another state | No error-state screen; OTP shows inline `_error` text only | PARTIAL (`_otpPage` error text; no dedicated state) |
 | F4 Logged-out Settings | `SettingsScreen` pushed from landing gear (`_loggedOutSettings`) | IMPLEMENTED |
 | F5 Landing fresh-boot | Same `OnboardingFlow` landing | IMPLEMENTED (duplicate of A1) |

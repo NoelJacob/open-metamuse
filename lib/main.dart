@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 
 import './internal/state.dart';
 import './theme.dart';
+import './welcome/otp.dart';
 import './welcome/welcome.dart';
 
 void main() async {
@@ -21,7 +22,7 @@ class MuseApp extends StatelessWidget {
     refreshListenable: state.sessionStage,
     redirect: (context, routerState) {
       final loggedIn = state.sessionStage.value == SessionStage.loggedIn;
-      final onWelcome = routerState.matchedLocation == '/welcome';
+      final onWelcome = routerState.matchedLocation.startsWith('/welcome');
 
       if (!loggedIn && !onWelcome) return '/welcome';
       if (loggedIn && onWelcome) return '/';
@@ -31,7 +32,7 @@ class MuseApp extends StatelessWidget {
       GoRoute(
         path: '/welcome',
         builder: (context, state) => Welcome(),
-        // routes: [GoRoute(path: 'otp', builder: (context, state) => Otp)],
+        routes: [GoRoute(path: 'otp', builder: (context, state) => Otp())],
       ),
       // GoRoute(
       //   path: '/',

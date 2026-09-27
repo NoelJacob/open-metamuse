@@ -492,3 +492,5 @@ pyrightconfig.json
 
 muse.apk
 muse-decompiled/
+# Widget Preview related
+.widget_preview/

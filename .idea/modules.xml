@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/openmetamuse.iml" filepath="$PROJECT_DIR$/openmetamuse.iml" />
       <module fileurl="file://$PROJECT_DIR$/android/openmetamuse_android.iml" filepath="$PROJECT_DIR$/android/openmetamuse_android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sveltekit/sveltekit.iml" filepath="$PROJECT_DIR$/sveltekit/sveltekit.iml" />
     </modules>
   </component>
 </project>

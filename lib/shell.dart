@@ -1,10 +1,10 @@
+import 'package:material_ui/material_ui.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-import 'package:material_ui/material_ui.dart';
-
+import './icons/muse.dart';
+import './internal/state.dart';
 import 'chat.dart';
 import 'feed.dart';
-import 'state.dart';
 import 'tabs.dart';
 import 'theme.dart';
 
@@ -35,6 +35,8 @@ class _AdaptiveShellState extends State<AdaptiveShell> {
     _gateShown = true;
     if (await Permission.notification.isGranted) return;
     if (!mounted) return;
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -46,29 +48,27 @@ class _AdaptiveShellState extends State<AdaptiveShell> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Center(
+              Center(
                 child: Icon(
                   Icons.notifications_outlined,
                   size: 40,
-                  color: Color(0xFF6F7278),
+                  color: cs.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: 12),
               RichText(
                 textAlign: TextAlign.center,
-                text: const TextSpan(
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.black,
-                    height: 1.25,
-                  ),
+                text: TextSpan(
+                  style: tt.headlineSmall,
                   children: [
-                    TextSpan(text: 'Allow '),
+                    const TextSpan(text: 'Allow '),
                     TextSpan(
                       text: 'Muse',
-                      style: TextStyle(fontWeight: FontWeight.w700),
+                      style: tt.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                    TextSpan(text: ' to send you\nnotifications?'),
+                    const TextSpan(text: ' to send you\nnotifications?'),
                   ],
                 ),
               ),
@@ -77,37 +77,16 @@ class _AdaptiveShellState extends State<AdaptiveShell> {
                 height: 52,
                 child: FilledButton(
                   onPressed: () => Navigator.pop(context),
-                  style: FilledButton.styleFrom(
-                    shape: const StadiumBorder(),
-                    backgroundColor: const Color(0xFF0064E0),
-                  ),
-                  child: const Text(
-                    'Allow',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
+                  child: Text('Allow', style: tt.labelLarge),
                 ),
               ),
               const SizedBox(height: 4),
               SizedBox(
                 height: 52,
-                child: FilledButton(
+                child: FilledButton.tonal(
                   onPressed: () => Navigator.pop(context),
-                  style: FilledButton.styleFrom(
-                    shape: const StadiumBorder(),
-                    backgroundColor: const Color(0xFFF0F1F5),
-                  ),
-                  child: const Text(
-                    'Don\u2019t allow',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
-                    ),
-                  ),
+
+                  child: Text('Don\u2019t allow', style: tt.labelLarge),
                 ),
               ),
             ],
@@ -172,17 +151,21 @@ class _TabCell extends StatelessWidget {
   Widget _icon(Color color) {
     switch (index) {
       case 1:
-        return MuseTabIcons.bulb(size: 30, color: color);
+        return MuseIcon(MuseIconAsset.bulb, size: 30, color: color);
       case 2:
-        return selected
-            ? MuseTabIcons.checkFilled(size: 30, color: color)
-            : MuseTabIcons.check(size: 30, color: color);
+        return MuseIcon(
+          selected ? MuseIconAsset.checkFilled : MuseIconAsset.check,
+          size: 30,
+          color: color,
+        );
       case 3:
-        return MuseTabIcons.grid(size: 30, color: color);
+        return MuseIcon(MuseIconAsset.grid, size: 30, color: color);
       default:
-        return selected
-            ? MuseTabIcons.chatFilled(size: 30, color: color)
-            : MuseTabIcons.chatOutline(size: 30, color: color);
+        return MuseIcon(
+          selected ? MuseIconAsset.chatFilled : MuseIconAsset.chatOutline,
+          size: 30,
+          color: color,
+        );
     }
   }
 
@@ -190,7 +173,10 @@ class _TabCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     // ponytail: original selected tab is near-black, not brand blue.
-    final color = selected ? Colors.black : cs.onSurfaceVariant;
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final color = selected
+        ? (dark ? MusePalette.tabSelectedDark : MusePalette.tabSelectedLight)
+        : cs.onSurfaceVariant;
     return Semantics(
       label: _labels[index],
       button: true,

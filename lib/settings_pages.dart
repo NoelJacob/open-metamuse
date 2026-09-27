@@ -1,14 +1,9 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'state.dart';
 
-import 'package:permission_handler/permission_handler.dart';
-
 // ponytail: static grouped-card ports; form submits stay disabled, no backend.
-const _bg = Color(0xFFF0F1F5);
-const _muted = Color(0xFF6F7278);
-const _link = Color(0xFF0064E0);
-const _paleBlue = Color(0xFFB4CFFC);
 
 /// Shared sub-screen frame: grey bg, back-circle button, centered title.
 class _SubPage extends StatelessWidget {
@@ -18,8 +13,10 @@ class _SubPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: cs.surface,
       body: SafeArea(
         child: Column(
           children: [
@@ -36,25 +33,15 @@ class _SubPage extends StatelessWidget {
                       child: Container(
                         width: 48,
                         height: 48,
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.white,
+                          color: cs.surfaceContainerLow,
                         ),
-                        child: const Icon(
-                          Icons.arrow_back,
-                          color: Colors.black,
-                        ),
+                        child: Icon(Icons.arrow_back, color: cs.onSurface),
                       ),
                     ),
                   ),
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black,
-                    ),
-                  ),
+                  Text(title, style: tt.headlineSmall),
                 ],
               ),
             ),
@@ -80,9 +67,10 @@ class _Card extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cs.surfaceContainerLow,
         borderRadius: BorderRadius.circular(28),
       ),
       child: Column(children: children),
@@ -106,10 +94,7 @@ class _Row extends StatelessWidget {
         child: Row(
           children: [
             Expanded(
-              child: Text(
-                label,
-                style: const TextStyle(fontSize: 17, color: Colors.black),
-              ),
+              child: Text(label, style: Theme.of(context).textTheme.bodyLarge),
             ),
             trailing,
           ],
@@ -121,7 +106,7 @@ class _Row extends StatelessWidget {
 
 Widget _divider() => const Padding(
   padding: EdgeInsets.symmetric(horizontal: 20),
-  child: Divider(height: 1, color: Color(0xFFE8E9ED)),
+  child: Divider(height: 1),
 );
 
 class _SectionLabel extends StatelessWidget {
@@ -130,34 +115,41 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 20, 8, 8),
-      child: Text(label, style: const TextStyle(fontSize: 15, color: _muted)),
+      child: Text(
+        label,
+        style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+      ),
     );
   }
 }
 
-Widget _disabledPill(String label) => SizedBox(
-  height: 56,
-  child: FilledButton(
-    onPressed: null,
-    style: FilledButton.styleFrom(
-      shape: const StadiumBorder(),
-      disabledBackgroundColor: _paleBlue,
-    ),
-    child: Text(
-      label,
-      style: const TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.w600,
-        color: Colors.white70,
-      ),
-    ),
-  ),
-);
+Widget _disabledPill(BuildContext context, String label) {
+  final cs = Theme.of(context).colorScheme;
+  final tt = Theme.of(context).textTheme;
+  return SizedBox(
+    height: 56,
+    child: FilledButton(
+      onPressed: null,
 
-const _chev = Icon(Icons.chevron_right, color: Color(0xFFC7C9D1), size: 24);
-const _ext = Icon(Icons.north_east, color: Color(0xFFC7C9D1), size: 20);
+      child: Text(label, style: tt.labelLarge),
+    ),
+  );
+}
+
+Icon _chev(BuildContext context) => Icon(
+  Icons.chevron_right,
+  color: Theme.of(context).colorScheme.outline,
+  size: 24,
+);
+Icon _ext(BuildContext context) => Icon(
+  Icons.north_east,
+  color: Theme.of(context).colorScheme.outline,
+  size: 20,
+);
 
 class LegalInfoScreen extends StatelessWidget {
   const LegalInfoScreen({super.key});
@@ -174,21 +166,23 @@ class LegalInfoScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     return _SubPage(
       title: 'Legal info',
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: RichText(
-            text: const TextSpan(
-              style: TextStyle(fontSize: 15, color: _muted, height: 1.35),
+            text: TextSpan(
+              style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
               children: [
-                TextSpan(
+                const TextSpan(
                   text: 'Responses are generated by AI. Some may be inaccurate or inappropriate. ',
                 ),
                 TextSpan(
                   text: 'Learn more',
-                  style: TextStyle(color: _link),
+                  style: tt.bodySmall?.copyWith(color: cs.secondary),
                 ),
               ],
             ),
@@ -198,7 +192,7 @@ class LegalInfoScreen extends StatelessWidget {
         _Card(
           children: [
             for (var i = 0; i < _rows.length; i++) ...[
-              _Row(label: _rows[i], trailing: _ext, onTap: null),
+              _Row(label: _rows[i], trailing: _ext(context), onTap: null),
               if (i != _rows.length - 1) _divider(),
             ],
           ],
@@ -225,11 +219,15 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
       children: [
         _Card(
           children: [
-            _Row(label: 'Muse Help Center', trailing: _ext, onTap: null),
+            _Row(
+              label: 'Muse Help Center',
+              trailing: _ext(context),
+              onTap: null,
+            ),
             _divider(),
             _Row(
               label: 'Submit feedback',
-              trailing: _chev,
+              trailing: _chev(context),
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const SubmitFeedbackScreen()),
               ),
@@ -243,15 +241,14 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               child: Row(
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Shake phone to report an issue',
-                      style: TextStyle(fontSize: 17, color: Colors.black),
+                      style: Theme.of(context).textTheme.bodyLarge,
                     ),
                   ),
                   Switch(
                     value: _shake,
-                    activeThumbColor: _link,
                     onChanged: (v) => setState(() => _shake = v),
                   ),
                 ],
@@ -281,6 +278,7 @@ class _SubmitFeedbackScreenState extends State<SubmitFeedbackScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return _SubPage(
       title: 'Submit feedback',
       children: [
@@ -292,7 +290,6 @@ class _SubmitFeedbackScreenState extends State<SubmitFeedbackScreen> {
               child: TextField(
                 decoration: InputDecoration(
                   hintText: 'Full name',
-                  hintStyle: TextStyle(fontSize: 17, color: _muted),
                   border: InputBorder.none,
                 ),
               ),
@@ -304,7 +301,6 @@ class _SubmitFeedbackScreenState extends State<SubmitFeedbackScreen> {
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
                   hintText: 'Email',
-                  hintStyle: TextStyle(fontSize: 17, color: _muted),
                   border: InputBorder.none,
                 ),
               ),
@@ -319,9 +315,7 @@ class _SubmitFeedbackScreenState extends State<SubmitFeedbackScreen> {
                 label: _topics[i],
                 trailing: Icon(
                   _topic == i ? Icons.check_circle : Icons.circle_outlined,
-                  color: _topic == i
-                      ? const Color(0xFF0064E0)
-                      : const Color(0xFFC7C9D1),
+                  color: _topic == i ? cs.primary : cs.outlineVariant,
                 ),
                 onTap: () => setState(() => _topic = i),
               ),
@@ -332,7 +326,7 @@ class _SubmitFeedbackScreenState extends State<SubmitFeedbackScreen> {
         const _SectionLabel('Describe your issue'),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: cs.surfaceContainerLow,
             borderRadius: BorderRadius.circular(28),
           ),
           child: const Padding(
@@ -342,14 +336,13 @@ class _SubmitFeedbackScreenState extends State<SubmitFeedbackScreen> {
               minLines: 5,
               decoration: InputDecoration(
                 hintText: 'Describe your issue',
-                hintStyle: TextStyle(fontSize: 17, color: _muted),
                 border: InputBorder.none,
               ),
             ),
           ),
         ),
         const SizedBox(height: 24),
-        _disabledPill('Submit'),
+        _disabledPill(context, 'Submit'),
       ],
     );
   }
@@ -382,23 +375,18 @@ class ReportIssueScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     return _SubPage(
       title: 'Report an issue',
       children: [
-        const Padding(
-          padding: EdgeInsets.fromLTRB(8, 8, 8, 8),
-          child: Text(
-            'What went wrong?',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: Colors.black,
-            ),
-          ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
+          child: Text('What went wrong?', style: tt.headlineSmall),
         ),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: cs.surfaceContainerLow,
             borderRadius: BorderRadius.circular(28),
           ),
           child: const Padding(
@@ -408,19 +396,18 @@ class ReportIssueScreen extends StatelessWidget {
               minLines: 5,
               decoration: InputDecoration(
                 hintText: 'Describe the bug you encountered...',
-                hintStyle: TextStyle(fontSize: 17, color: _muted),
                 border: InputBorder.none,
               ),
             ),
           ),
         ),
         const _SectionLabel('Attachments'),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 8),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Icon(
             Icons.add_photo_alternate_outlined,
             size: 36,
-            color: _muted,
+            color: cs.onSurfaceVariant,
           ),
         ),
         const _SectionLabel('Category'),
@@ -435,26 +422,23 @@ class ReportIssueScreen extends StatelessWidget {
                   vertical: 10,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: cs.surfaceContainerLow,
                   borderRadius: BorderRadius.circular(22),
-                  border: Border.all(color: const Color(0xFFE2E3E8), width: 1),
+                  border: Border.all(color: cs.outlineVariant, width: 1),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(icon, size: 18, color: Colors.black),
+                    Icon(icon, size: 18, color: cs.onSurface),
                     const SizedBox(width: 6),
-                    Text(
-                      label,
-                      style: const TextStyle(fontSize: 15, color: Colors.black),
-                    ),
+                    Text(label, style: tt.titleSmall),
                   ],
                 ),
               ),
           ],
         ),
         const SizedBox(height: 32),
-        _disabledPill('Submit Report'),
+        _disabledPill(context, 'Submit Report'),
       ],
     );
   }
@@ -484,15 +468,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               child: Row(
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Allow notifications',
-                      style: TextStyle(fontSize: 17, color: Colors.black),
+                      style: Theme.of(context).textTheme.bodyLarge,
                     ),
                   ),
                   Switch(
                     value: _enabled,
-                    activeThumbColor: _link,
                     onChanged: (v) => setState(() => _enabled = v),
                   ),
                 ],
@@ -500,11 +483,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             ),
           ],
         ),
-        const Padding(
-          padding: EdgeInsets.fromLTRB(20, 8, 20, 0),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
           child: Text(
             'Get notified when your agent responds or completes a task.',
-            style: TextStyle(fontSize: 13, color: Color(0xFF6F7278)),
+            style: Theme.of(context).textTheme.labelSmall,
           ),
         ),
       ],
@@ -533,15 +516,14 @@ class _AppLockScreenState extends State<AppLockScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               child: Row(
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Require biometrics',
-                      style: TextStyle(fontSize: 17, color: Colors.black),
+                      style: Theme.of(context).textTheme.bodyLarge,
                     ),
                   ),
                   Switch(
                     value: _enabled,
-                    activeThumbColor: _link,
                     onChanged: (v) => setState(() => _enabled = v),
                   ),
                 ],
@@ -549,11 +531,11 @@ class _AppLockScreenState extends State<AppLockScreen> {
             ),
           ],
         ),
-        const Padding(
-          padding: EdgeInsets.fromLTRB(20, 8, 20, 0),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
           child: Text(
             "You'll need to use your face or fingerprint to open the Muse app.",
-            style: TextStyle(fontSize: 13, color: Color(0xFF6F7278)),
+            style: Theme.of(context).textTheme.labelSmall,
           ),
         ),
       ],
@@ -573,6 +555,8 @@ class _DataControlsScreenState extends State<DataControlsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     return _SubPage(
       title: 'Data controls',
       children: [
@@ -583,31 +567,23 @@ class _DataControlsScreenState extends State<DataControlsScreen> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(
-                    Icons.shield_outlined,
-                    size: 28,
-                    color: Colors.black,
-                  ),
+                  Icon(Icons.shield_outlined, size: 28, color: cs.onSurface),
                   const SizedBox(width: 12),
                   Expanded(
                     child: RichText(
-                      text: const TextSpan(
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: Colors.black,
-                          height: 1.35,
-                        ),
+                      text: TextSpan(
+                        style: tt.bodySmall?.copyWith(color: cs.onSurface),
                         children: [
                           TextSpan(
                             text: 'Your privacy is important to us\n',
-                            style: TextStyle(fontWeight: FontWeight.w700),
+                            style: tt.titleSmall,
                           ),
-                          TextSpan(
+                          const TextSpan(
                             text: 'Learn about the steps we take to keep your information private and secure. ',
                           ),
                           TextSpan(
                             text: 'Learn more',
-                            style: TextStyle(color: Color(0xFF0064E0)),
+                            style: tt.bodySmall?.copyWith(color: cs.secondary),
                           ),
                         ],
                       ),
@@ -625,30 +601,26 @@ class _DataControlsScreenState extends State<DataControlsScreen> {
               label: 'Help improve our AI models',
               trailing: Icon(
                 _expanded ? Icons.expand_less : Icons.expand_more,
-                color: const Color(0xFFC7C9D1),
+                color: cs.outline,
                 size: 24,
               ),
               onTap: () => setState(() => _expanded = !_expanded),
             ),
             if (_expanded)
-              const Padding(
-                padding: EdgeInsets.fromLTRB(20, 0, 20, 18),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
                 child: Text(
                   'Allow us to use your interactions with Muse to develop and improve AI at Meta.',
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Color(0xFF6F7278),
-                    height: 1.35,
-                  ),
+                  style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
                 ),
               ),
           ],
         ),
-        const Padding(
-          padding: EdgeInsets.fromLTRB(20, 8, 20, 0),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
           child: Text(
             'Allow us to use your interactions with Muse to develop and improve AI at Meta.',
-            style: TextStyle(fontSize: 13, color: Color(0xFF6F7278)),
+            style: tt.labelSmall,
           ),
         ),
         const SizedBox(height: 16),
@@ -713,9 +685,11 @@ class DevicesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
     return _SubPage(
       title: 'Devices',
-      children: const [
+      children: [
         _Card(
           children: [
             Padding(
@@ -723,7 +697,7 @@ class DevicesScreen extends StatelessWidget {
               child: Center(
                 child: Text(
                   'No devices connected',
-                  style: TextStyle(fontSize: 16, color: Color(0xFF6F7278)),
+                  style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
                 ),
               ),
             ),
@@ -785,18 +759,18 @@ class DefaultAssistantScreen extends StatelessWidget {
           children: [
             _Row(
               label: 'Open system settings',
-              trailing: _chev,
+              trailing: _chev(context),
               onTap: () {
                 openAppSettings();
               },
             ),
           ],
         ),
-        const Padding(
-          padding: EdgeInsets.fromLTRB(20, 8, 20, 0),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
           child: Text(
             'Choose Muse as your default assistant app in system settings.',
-            style: TextStyle(fontSize: 13, color: Color(0xFF6F7278)),
+            style: Theme.of(context).textTheme.labelSmall,
           ),
         ),
       ],

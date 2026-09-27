@@ -1,9 +1,12 @@
+import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:openmetamuse/helpers.dart';
 
-import '../../icons/muse.dart';
+import '../widgets/button.dart';
+import '../widgets/logo.dart';
 
-class Landing extends StatelessWidget {
-  const new({super.key});
+class Welcome extends StatelessWidget {
+  const Welcome({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,13 +22,7 @@ class Landing extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const SizedBox(height: 48),
-                  Center(
-                    child: MuseIcon(
-                      MuseIconAsset.logo,
-                      size: 84,
-                      color: cs.onSurface,
-                    ),
-                  ),
+                  Center(child: MuseLogo.large()),
                   const SizedBox(height: 28),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -43,25 +40,8 @@ class Landing extends StatelessWidget {
             Positioned(
               top: 8,
               right: 16,
-              child: InkWell(
-                // onTap: onOpenSettings,
-                customBorder: const CircleBorder(),
-                child: Container(
-                  width: 48,
-                  height: 48,
-                  // decoration: BoxDecoration(
-                  //   shape: BoxShape.circle,
-                  //   border: Border.all(color: cs.outlineVariant, width: 0.5),
-                  // ),
-                  child: Center(
-                    child: MuseIcon(
-                      MuseIconAsset.gear,
-                      size: 24,
-                      color: cs.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-              ),
+              // TODO open loggedOutSettings
+              child: MuseGearButton.medium(onPressed: () {}),
             ),
           ],
         ),
@@ -77,7 +57,7 @@ class EmailForm extends StatefulWidget {
   State<EmailForm> createState() => _EmailFormState();
 }
 
-class _EmailFormState extends State<EmailForm> {
+class _EmailFormState extends State<EmailForm> with RunAsync<EmailForm> {
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -120,19 +100,17 @@ class _EmailFormState extends State<EmailForm> {
             ),
           ),
           const SizedBox(height: 24),
-          FilledButton(
+          MuseButton.primary(
             onPressed: () {
               if (_formKey.currentState!.validate()) {
                 // TODO: submit with the validated email, then route to OTP.
+                context.push("/welcome/otp");
               }
             },
-            style: FilledButton.styleFrom(minimumSize: Size.fromHeight(48)),
+            busy: busyAsync,
             child: const Text('Continue'),
           ),
-          // if (_err != null) ...[
-          //   SizedBox(height: 12),
-          //   Text(_err!, style: tt.labelSmall!.copyWith(color: cs.error)),
-          // ],
+          ...errorMessageAsync(),
         ],
       ),
     );

@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:share_plus/share_plus.dart';
 
+import 'icons/muse.dart';
 import 'settings.dart';
 import 'state.dart';
 
@@ -24,7 +25,7 @@ class FeedScreen extends StatelessWidget {
                 final text = '${u['title'] ?? ''}\n${u['subtitle'] ?? ''}'
                     .trim();
                 Navigator.pop(context);
-                Share.share(text);
+                SharePlus.instance.share(ShareParams(text: text));
               },
             ),
           ],
@@ -71,7 +72,7 @@ class FeedScreen extends StatelessWidget {
           actions: [
             IconButton(
               tooltip: 'Settings',
-              icon: const Icon(Icons.settings_outlined),
+              icon: const MuseIcon(MuseIconAsset.settingsGear),
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => SettingsScreen(state: state)),
               ),

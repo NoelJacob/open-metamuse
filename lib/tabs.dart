@@ -11,6 +11,8 @@ class TasksScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     return Scaffold(
       appBar: AppBar(title: const Text('Tasks')),
       floatingActionButton: Builder(
@@ -30,12 +32,12 @@ class TasksScreen extends StatelessWidget {
         listenable: state,
         builder: (context, _) {
           if (state.goals.isEmpty) {
-            return const Center(
+            return Center(
               child: Padding(
-                padding: EdgeInsets.all(32),
+                padding: const EdgeInsets.all(32),
                 child: Text(
                   'No tasks yet',
-                  style: TextStyle(fontSize: 16, color: Color(0xFF6F7278)),
+                  style: tt.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
                 ),
               ),
             );
@@ -67,6 +69,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     if (_sysFiles) {
       return Scaffold(
         appBar: AppBar(
@@ -77,12 +81,12 @@ class _LibraryScreenState extends State<LibraryScreen> {
           ),
           title: const Text('System Files'),
         ),
-        body: const Center(
+        body: Center(
           child: Padding(
-            padding: EdgeInsets.all(32),
+            padding: const EdgeInsets.all(32),
             child: Text(
               'No system files',
-              style: TextStyle(fontSize: 16, color: Color(0xFF6F7278)),
+              style: tt.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
             ),
           ),
         ),
@@ -125,10 +129,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                       ? 'Nothing created yet\nWhen you create something like a document, it will appear here.'
                       : 'No Media yet\nWhen you capture photos or videos, they will appear here.',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Color(0xFF6F7278),
-                  ),
+                  style: tt.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
                 ),
               ),
             ),
@@ -158,6 +159,8 @@ class _GoalSheetState extends State<_GoalSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     return SafeArea(
       child: SingleChildScrollView(
         padding: EdgeInsets.fromLTRB(
@@ -170,10 +173,10 @@ class _GoalSheetState extends State<_GoalSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
+            Text(
               'New goal',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+              style: tt.headlineSmall,
             ),
             const SizedBox(height: 8),
             TextField(
@@ -192,18 +195,7 @@ class _GoalSheetState extends State<_GoalSheet> {
                   widget.state.addGoal(_title.text);
                   Navigator.pop(context);
                 },
-                style: FilledButton.styleFrom(
-                  shape: const StadiumBorder(),
-                  backgroundColor: const Color(0xFF0064E0),
-                ),
-                child: const Text(
-                  'Create goal',
-                  style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
+                child: Text('Create goal', style: tt.labelLarge),
               ),
             ),
           ],

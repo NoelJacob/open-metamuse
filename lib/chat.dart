@@ -1,11 +1,12 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:share_plus/share_plus.dart';
 
-import 'settings.dart';
-
 import 'composer.dart';
+import 'icons/muse.dart';
+import 'settings.dart';
 import 'state.dart';
+import 'theme.dart';
 
 // ponytail: one card switch + stock dialogs; no custom renderers per kind.
 class ChatScreen extends StatelessWidget {
@@ -27,6 +28,8 @@ class _ChatBody extends StatelessWidget {
     return ListenableBuilder(
       listenable: state,
       builder: (context, _) {
+        final cs = Theme.of(context).colorScheme;
+        final tt = Theme.of(context).textTheme;
         return Scaffold(
           // ponytail: measured chrome — 60dp menu circle; main centers avatar
           // block, threads use title row (orig-13 vs thread dumps).
@@ -43,20 +46,13 @@ class _ChatBody extends StatelessWidget {
                         Container(
                           width: 48,
                           height: 48,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFE5E6E8),
+                          decoration: BoxDecoration(
+                            color: cs.surfaceContainerHigh,
                             shape: BoxShape.circle,
                           ),
                         ),
                         const SizedBox(height: 6),
-                        const Text(
-                          'Muse',
-                          style: TextStyle(
-                            fontSize: 19,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.black,
-                          ),
-                        ),
+                        Text('Muse', style: tt.titleLarge),
                       ],
                     )
                   : Padding(
@@ -77,11 +73,15 @@ class _ChatBody extends StatelessWidget {
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       border: Border.all(
-                                        color: const Color(0xFFE2E3E8),
+                                        color: cs.outline,
                                         width: 1.5,
                                       ),
                                     ),
-                                    child: const Icon(Icons.menu, size: 24),
+                                    child: Icon(
+                                      Icons.menu,
+                                      size: 24,
+                                      color: cs.onSurface,
+                                    ),
                                   ),
                                 ),
                                 Expanded(
@@ -91,12 +91,7 @@ class _ChatBody extends StatelessWidget {
                                       Text(
                                         state.currentTitle,
                                         textAlign: TextAlign.center,
-                                        style: const TextStyle(
-                                          fontSize: 19,
-                                          height: 1.0,
-                                          fontWeight: FontWeight.w700,
-                                          color: Colors.black,
-                                        ),
+                                        style: tt.titleLarge,
                                       ),
                                       const SizedBox(height: 4),
                                       Container(
@@ -105,17 +100,14 @@ class _ChatBody extends StatelessWidget {
                                           vertical: 4,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFFF0F1F5),
+                                          color: cs.secondaryContainer,
                                           borderRadius: BorderRadius.circular(
                                             500,
                                           ),
                                         ),
-                                        child: const Text(
+                                        child: Text(
                                           'Active now',
-                                          style: TextStyle(
-                                            fontSize: 13,
-                                            color: Color(0xFF6F7278),
-                                          ),
+                                          style: tt.labelSmall,
                                         ),
                                       ),
                                     ],
@@ -155,13 +147,10 @@ class _ChatBody extends StatelessWidget {
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                const Text(
+                                Text(
                                   'SEP 8, 8:23 AM',
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Color(0xFF6F7278),
-                                  ),
+                                  style: tt.labelSmall,
                                 ),
                                 const SizedBox(height: 10),
                                 _Bubble(
@@ -213,6 +202,7 @@ class _Bubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final chat = MuseChatColors.of(context);
     final mine = msg['role'] == 'user';
     final cards = ((msg['cards'] as List?) ?? [])
         .map((e) => Map<String, dynamic>.from(e as Map))
@@ -236,7 +226,7 @@ class _Bubble extends StatelessWidget {
           maxWidth: MediaQuery.sizeOf(context).width * 0.85,
         ),
         decoration: BoxDecoration(
-          color: mine ? const Color(0xFF000000) : const Color(0xFFE9EAED),
+          color: mine ? chat.userBubble : chat.agentBubble,
           borderRadius: BorderRadius.circular(20).copyWith(
             bottomRight: mine
                 ? const Radius.circular(6)
@@ -264,20 +254,17 @@ class _Bubble extends StatelessWidget {
           : CrossAxisAlignment.start,
       children: [
         if (!mine && replyTo.isNotEmpty && showReply) ...[
-          const Padding(
-            padding: EdgeInsets.only(left: 24),
+          Padding(
+            padding: const EdgeInsets.only(left: 24),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.reply, size: 14, color: Color(0xFF6F7278)),
-                SizedBox(width: 4),
+                Icon(Icons.reply, size: 14, color: chat.replyAttribution),
+                const SizedBox(width: 4),
                 Text(
                   'Muse replied to you',
-                  style: TextStyle(
-                    fontSize: 13,
-                    height: 1.2,
-                    color: Color(0xFF6F7278),
-                  ),
+                  style: Theme.of(context).textTheme.labelSmall!
+                      .copyWith(height: 1.2, color: chat.replyAttribution),
                 ),
               ],
             ),
@@ -289,14 +276,15 @@ class _Bubble extends StatelessWidget {
               constraints: const BoxConstraints(maxWidth: 350),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
               decoration: BoxDecoration(
-                color: const Color(0xFFE9EAED),
+                color: chat.quoteFill,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
                 replyTo,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 17, color: Color(0xFF232937)),
+                style: Theme.of(context).textTheme.bodyLarge!
+                    .copyWith(color: chat.agentText),
               ),
             ),
           ),
@@ -315,6 +303,8 @@ class _CardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final kind = (card['kind'] ?? card['type'] ?? 'text').toString();
     final title = (card['title'] ?? '').toString();
     final subtitle = (card['subtitle'] ?? '').toString();
@@ -339,7 +329,7 @@ class _CardView extends StatelessWidget {
             subtitle: subtitle.isEmpty ? null : Text(subtitle),
             trailing: Text(
               'Link',
-              style: TextStyle(fontSize: 15, color: Colors.black38),
+              style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant),
             ),
           ),
         );
@@ -351,7 +341,7 @@ class _CardView extends StatelessWidget {
             subtitle: subtitle.isEmpty ? null : Text(subtitle),
             trailing: Text(
               'Get',
-              style: TextStyle(fontSize: 15, color: Colors.black38),
+              style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant),
             ),
           ),
         );
@@ -447,6 +437,8 @@ class _ThreadDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
     return Drawer(
       child: SafeArea(
         child: Column(
@@ -457,7 +449,7 @@ class _ThreadDrawer extends StatelessWidget {
                 builder: (drawerCtx) {
                   return IconButton(
                     tooltip: 'Settings',
-                    icon: const Icon(Icons.settings_outlined),
+                    icon: const MuseIcon(MuseIconAsset.settingsGear),
                     onPressed: () => Navigator.of(drawerCtx).push(
                       MaterialPageRoute(
                         builder: (_) => SettingsScreen(state: state),
@@ -476,17 +468,14 @@ class _ThreadDrawer extends StatelessWidget {
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: const [
-                  Text(
-                    'Muse',
-                    style: TextStyle(fontSize: 19, fontWeight: FontWeight.w700),
-                  ),
-                  SizedBox(height: 4),
-                  Text('Main chat', style: TextStyle(fontSize: 17)),
-                  SizedBox(height: 8),
+                children: [
+                  Text('Muse', style: tt.titleLarge),
+                  const SizedBox(height: 4),
+                  Text('Main chat', style: tt.bodyLarge),
+                  const SizedBox(height: 8),
                   Text(
                     'Side chats',
-                    style: TextStyle(fontSize: 15, color: Color(0xFF6F7278)),
+                    style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant),
                   ),
                 ],
               ),
@@ -495,9 +484,11 @@ class _ThreadDrawer extends StatelessWidget {
               child: ListView(
                 children: [
                   ListTile(
-                    title: const Text(
+                    title: Text(
                       'Archived',
-                      style: TextStyle(color: Colors.black38),
+                      style: tt.bodyMedium!.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
                     ),
                   ),
                   const Divider(height: 1),
@@ -636,6 +627,7 @@ class _MenuBubbleState extends State<_MenuBubble> {
 
   @override
   Widget build(BuildContext context) {
+    final emoji = Theme.of(context).textTheme.headlineMedium;
     if (_selecting) {
       return GestureDetector(
         onTap: () => setState(() => _selecting = false),
@@ -649,24 +641,24 @@ class _MenuBubbleState extends State<_MenuBubble> {
             position: const RelativeRect.fromLTRB(72, 640, 72, 640),
             items: [
               // ponytail: original reaction bar; taps dismiss (no stub endpoint).
-              const PopupMenuItem(
+              PopupMenuItem(
                 enabled: false,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('👍', style: TextStyle(fontSize: 22)),
-                    SizedBox(width: 6),
-                    Text('❤️', style: TextStyle(fontSize: 22)),
-                    SizedBox(width: 6),
-                    Text('😂', style: TextStyle(fontSize: 22)),
-                    SizedBox(width: 6),
-                    Text('😮', style: TextStyle(fontSize: 22)),
-                    SizedBox(width: 6),
-                    Text('😢', style: TextStyle(fontSize: 22)),
-                    SizedBox(width: 6),
-                    Text('🙏', style: TextStyle(fontSize: 22)),
-                    SizedBox(width: 6),
-                    Text('🔥', style: TextStyle(fontSize: 22)),
+                    Text('👍', style: emoji),
+                    const SizedBox(width: 6),
+                    Text('❤️', style: emoji),
+                    const SizedBox(width: 6),
+                    Text('😂', style: emoji),
+                    const SizedBox(width: 6),
+                    Text('😮', style: emoji),
+                    const SizedBox(width: 6),
+                    Text('😢', style: emoji),
+                    const SizedBox(width: 6),
+                    Text('🙏', style: emoji),
+                    const SizedBox(width: 6),
+                    Text('🔥', style: emoji),
                   ],
                 ),
               ),
@@ -720,7 +712,7 @@ class _MenuBubbleState extends State<_MenuBubble> {
             } else if (v == 'select') {
               setState(() => _selecting = true);
             } else if (v == 'share') {
-              Share.share(text);
+              SharePlus.instance.share(ShareParams(text: text));
             }
           }),
       child: widget.bubble(false),
@@ -739,26 +731,23 @@ class _BubbleText extends StatelessWidget {
     required this.selecting,
   });
 
-  TextStyle get _style => TextStyle(
-    fontSize: 15,
-    // ponytail: measured original line height 1.0.
-    height: 1.0,
-    color: mine ? Colors.white : const Color(0xFF232937),
-  );
-
   @override
   Widget build(BuildContext context) {
+    // ponytail: measured original line height 1.0.
+    final chat = MuseChatColors.of(context);
+    final style = Theme.of(context).textTheme.bodySmall!
+        .copyWith(height: 1.0, color: mine ? chat.userText : chat.agentText);
     if (selecting) {
       // ponytail: real SelectableText — OS handles + toolbar on long-press,
       // the original's Select UX. Safe here: select mode shows no showMenu
       // to hijack (default mode stays Text so our menu owns long-press).
       return SelectableText(
         text,
-        style: _style,
+        style: style,
         autofocus: true,
         showCursor: true,
       );
     }
-    return Text(text, style: _style);
+    return Text(text, style: style);
   }
 }

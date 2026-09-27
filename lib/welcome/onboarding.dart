@@ -1,12 +1,11 @@
 import 'package:flutter/gestures.dart';
+import 'package:flutter/widget_previews.dart';
 import 'package:material_ui/material_ui.dart';
 
-import '../api.dart';
 import '../icons/muse.dart';
 import '../internal/state.dart';
-import '../settings.dart';
 import '../theme.dart';
-import 'landing.dart';
+import 'welcome.dart';
 
 class OnboardingFlow extends StatefulWidget {
   final AppState state;
@@ -31,110 +30,66 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
 
   AppState get _s => widget.state;
 
-  Future<void> _run(Future<void> Function() fn) async {
-    setState(() {
-      _busy = true;
-      _error = null;
-    });
-    try {
-      await fn();
-    } on ApiError catch (e) {
-      setState(() => _error = e.message);
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }
-
   void _activationDone() {
-    _s.setStage(SessionStage.main);
+    _s.setSessionStage(SessionStage.loggedIn);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_step == 0) return _landing();
-    return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 480),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: _busy
-                  ? const Center(child: CircularProgressIndicator())
-                  : _body(),
-            ),
-          ),
-        ),
-      ),
-    );
+    // if (_step == 0)
+    return _landing();
+    // return Scaffold(
+    //   body: SafeArea(
+    //     child: Center(
+    //       child: ConstrainedBox(
+    //         constraints: const BoxConstraints(maxWidth: 480),
+    //         child: Padding(
+    //           padding: const EdgeInsets.all(24),
+    //           child: _busy
+    //               ? const Center(child: CircularProgressIndicator())
+    //               : _body(),
+    //         ),
+    //       ),
+    //     ),
+    //   ),
+    // );
   }
 
-  Widget _landing() => Landing(
-    phone: _phone,
-    busy: _busy,
-    error: _error,
-    onPhoneChanged: () => setState(() {}),
-    onContinue: () => _run(() async {
-      await _s.startPhone(_phone.text.trim());
-      setState(() => _step = 2);
-    }),
-    onOpenSettings: _loggedOutSettings,
+  Widget _landing() => Welcome(
+    // phone: _phone,
+    // busy: _busy,
+    // error: _error,
+    // onPhoneChanged: () => setState(() {}),
+    // onContinue: () => _run(() async {
+    //   await _s.startPhone(_phone.text.trim());
+    //   setState(() => _step = 2);
+    // }),
+    // onOpenSettings: _loggedOutSettings,
   );
 
   void _loggedOutSettings() {
-    Navigator.of(context)
-        .push(MaterialPageRoute(builder: (_) => SettingsScreen(state: _s)));
+    // Navigator.of(
+    //   context,
+    // ).push(MaterialPageRoute<void>(builder: (_) => SettingsScreen(state: _s)));
   }
 
-  Widget _body() {
-    final cs = Theme.of(context).colorScheme;
-    switch (_step) {
-      case 1:
-        return _frame('Enter your phone number', [
-          TextField(
-            controller: _phone,
-            keyboardType: TextInputType.phone,
-            decoration: const InputDecoration(
-              labelText: 'Phone',
-              hintText: '+1…',
-            ),
-          ),
-          _go('Send code', () async {
-            await _s.startPhone(_phone.text.trim());
-            setState(() => _step = 2);
-          }),
-        ]);
-      case 2:
-        return _otpPage();
-      case 3:
-      case 4:
-      case 5:
-      case 7:
-        // ponytail: account/connectors/identity/PIN stand-ins removed;
-        // original skips them offline, activation pass-through remains.
-        _s.setStage(SessionStage.activation);
-        Future.microtask(() async {
-          await _run(() async {
-            await _s.activateVm();
-            _activationDone();
-          });
-        });
-        return _frame('Activating…', const [
-          Center(child: CircularProgressIndicator()),
-        ]);
-      default:
-        return _frame('Welcome to Muse', [
-          Icon(Icons.chat_bubble, size: 64, color: cs.secondary),
-          _go('Get started', () async {
-            _s.beginOnboarding();
-            await _run(() => _s.loadHub());
-            setState(() => _step = 1);
-          }),
-        ]);
-    }
-  }
+  // Widget _body() {
+  //   final cs = Theme.of(context).colorScheme;
+  //   switch (_step) {
+  //     case 2:
+  //       return _otpPage();
+  //     case 3:
+  //     case 4:
+  //     case 5:
+  //     case 7:
+  //       return _frame('Activating…', const [
+  //         Center(child: CircularProgressIndicator()),
+  //       ]);
+  //   }
+  // }
 
   // ponytail: port of NativeLoginOtpScreen (code cells + Confirm + Try another way).
+  @Preview()
   Widget _otpPage() {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
@@ -196,9 +151,8 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                         style: tt.bodySmall!.copyWith(
                           color: MusePalette.linkLight,
                         ),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () =>
-                              _run(() => _s.startPhone(_phone.text.trim())),
+                        recognizer: TapGestureRecognizer()..onTap = () => {},
+                        // _run(() => _s.startPhone(_phone.text.trim())),
                       ),
                     ],
                   ),
@@ -208,13 +162,13 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
               _OtpBoxes(
                 onUpdate: (c) => setState(() => _code = c),
                 onDone: (code) {
-                  _run(() async {
-                    await _s.confirmOtp(code);
-                    _s.setStage(SessionStage.activation);
-                    await _s.activateVm();
-                    _s.setStage(SessionStage.main);
-                    await _s.bootstrap();
-                  });
+                  // _run(() async {
+                  //   await _s.confirmOtp(code);
+                  //   _s.setStage(SessionStage.activation);
+                  //   await _s.activateVm();
+                  //   _s.setStage(SessionStage.main);
+                  //   await _s.bootstrap();
+                  // });
                 },
               ),
               const SizedBox(height: 28),
@@ -223,17 +177,18 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                 child: SizedBox(
                   height: 48,
                   child: FilledButton(
-                    onPressed: _busy || _code.length < 6
-                        ? null
-                        : () {
-                            _run(() async {
-                              await _s.confirmOtp(_code);
-                              _s.setStage(SessionStage.activation);
-                              await _s.activateVm();
-                              _s.setStage(SessionStage.main);
-                              await _s.bootstrap();
-                            });
-                          },
+                    onPressed: () {},
+                    // _busy || _code.length < 6
+                    //     ? null
+                    //     : () {
+                    //         _run(() async {
+                    //           await _s.confirmOtp(_code);
+                    //           _s.setStage(SessionStage.activation);
+                    //           await _s.activateVm();
+                    //           _s.setStage(SessionStage.main);
+                    //           await _s.bootstrap();
+                    //         });
+                    //       },
                     child: _busy
                         ? SizedBox(
                             width: 22,

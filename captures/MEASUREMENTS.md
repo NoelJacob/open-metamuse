@@ -76,3 +76,20 @@ quote 0 extra left; reply label +24dp left.
 - **Header status pill**: original screenshot reads `is reconnecting` (its backend was blocked); the clone shows the honest connected state.
 - Main chat residual 3.63% is concentrated in text rasterization (Flutter/Skia vs Compose glyph hinting) and the OTP keypad region; no structural additions remain.
 - OTP 8.84% residual: hardware keyboard shown instead of the original's on-screen keypad, plus Confirm disabled/enabled timing.
+
+## Theme migration proof (this session): Flutter clone both modes
+- Fresh release build, light chat (uimode night no):
+- y=700 chat bg `#FFFCFCFC` 1080px = chat background light
+- y=1000 agent bubble `#FFE9EAEB` 917px on `#FFFCFCFC` canvas = agent bubble light
+- y=2080 composer `#FFE9EAEB` 976px = composer pill light
+- y=560 user bubble `#FF000000` 688px = user bubble light
+- Fresh release build, dark chat (uimode night yes):
+- y=700 chat bg `#FF050505` 1080px = chat background dark
+- y=1000 agent bubble `#FF1F1F1F` 917px on `#FF050505` canvas = agent bubble dark
+- y=2080 composer `#FF1F1F1F` 976px = composer pill dark
+- y=560 user bubble `#FFFFFFFF` 688px = user bubble dark
+
+- Logo tint fix: muse_logo (onboarding landing/OTP, tos) + muse_avatar (settings) now colorFilter cs.onSurface; dark landing logo renders white, zero #E5E6E8 in live shots.
+- landing light: bg #FFFCFCFC; landing dark: bg #FF050505, logo white, field/button themed (visual pass /tmp/r_l.png, /tmp/r_d2.png).
+- Funnel PKG verified: applicationId is `com.metamuse.flutter.openmetamuse`; `scripts/funnel.sh` PKG correct as-is (earlier `com.example.*` starts were silent no-ops).
+- Live `cmd uimode` repaints without restart; capture needs `sleep 4` after toggle (fast captures catch mid-transition).

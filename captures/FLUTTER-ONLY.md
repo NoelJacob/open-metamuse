@@ -12,7 +12,7 @@ fixes proposed.
 
 | # | Clone surface | Original counterpart | Verdict | Evidence |
 |---|---|---|---|---|
-| F1 | Onboarding account chooser: `Choose an account`, u1 `Muse User` / u2 `Work Profile` (`lib/onboarding.dart` step 3) | None — original skips selection offline (`account_selection_required: False` in `server/orig/addon.py` `confirm_otp`) | EXTRA, keep as offline stand-in | Audit E1; no original account-selection capture exists |
+| F1 | Onboarding account chooser: `Choose an account`, u1 `Muse User` / u2 `Work Profile` (`../lib/welcome` step 3) | None — original skips selection offline (`account_selection_required: False` in `server/orig/addon.py` `confirm_otp`) | EXTRA, keep as offline stand-in | Audit E1; no original account-selection capture exists |
 | F2 | Onboarding connectors: `Link connectors (optional)`, WhatsApp/Telegram/Messenger switches, local-only toggle (`onboarding.dart` step 4) | No connectors screen reached offline; connector permission sheets exist only as keys (`ConnectorPermissionsScreenKey`, `ChannelConnectScreenKey`) | EXTRA | No original capture; stubs carry no connector UI |
 | F3 | Onboarding identity: `What should Muse call you?` name field (`onboarding.dart` step 5) | Identity onboarding exists only as a key (`OnboardingIdentity…` in `navigation/entries/`); never reached in the sweep | EXTRA | No original capture; key only |
 | F4 | Onboarding PIN: `Set a 4-digit PIN` (`onboarding.dart` step 7, `state.completePin`) | PIN entry exists only as keys (`ConfidentialVmRegisterPin…`, `MessengerPin/ResetPin`); the sweep's PIN submits went through the mock, no original PIN screen captured | EXTRA | No original capture; keys only |
