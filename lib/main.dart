@@ -1,61 +1,66 @@
-import 'package:flutter/widget_previews.dart';
+import 'package:go_router/go_router.dart';
 import 'package:m3e_core/m3e_core.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:openmetamuse/internal/state.dart';
 
-import 'gate_error.dart';
-import 'onboarding/onboarding.dart';
-import 'shell.dart';
-import 'theme.dart';
+import './internal/state.dart';
+import './theme.dart';
+import './welcome/welcome.dart';
 
-void main() => runApp(const MuseApp());
-
-class MuseApp extends StatefulWidget {
-  const MuseApp({super.key});
-
-  @override
-  State<MuseApp> createState() => _MuseAppState();
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final AppState state = await AppState.create();
+  runApp(MuseApp(state: state));
 }
 
-class _MuseAppState extends State<MuseApp> {
-  final Future<AppState> _future = AppState.create();
+class MuseApp extends StatelessWidget {
+  final AppState state;
+  MuseApp({super.key, required this.state});
+
+  late final GoRouter _router = GoRouter(
+    initialLocation: '/welcome',
+    refreshListenable: state.sessionStage,
+    redirect: (context, routerState) {
+      final loggedIn = state.sessionStage.value == SessionStage.loggedIn;
+      final onWelcome = routerState.matchedLocation == '/welcome';
+
+      if (!loggedIn && !onWelcome) return '/welcome';
+      if (loggedIn && onWelcome) return '/';
+      return null;
+    },
+    routes: [
+      GoRoute(
+        path: '/welcome',
+        builder: (context, state) => Welcome(),
+        // routes: [GoRoute(path: 'otp', builder: (context, state) => Otp)],
+      ),
+      // GoRoute(
+      //   path: '/',
+      // builder: (context, state) => AdaptiveShell(state: this.state),
+      // ),
+    ],
+  );
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: _future,
-      builder: (context, snap) {
-        if (snap.connectionState == ConnectionState.waiting) {
-          return StartupLoader();
-        }
-        if (snap.hasError) {
-          return GateErrorScreen();
-        }
-        final state = snap.requireData;
-        return ListenableBuilder(
-          listenable: Listenable.merge([state.themeMode, state.sessionStage]),
-          builder: (context, _) => MaterialApp(
-            debugShowCheckedModeBanner: false,
-            title: 'Muse',
-            theme: museLightTheme(),
-            darkTheme: museDarkTheme(),
-            themeMode: state.themeMode.value,
-            home: state.sessionStage.value == SessionStage.loggedIn
-                ? AdaptiveShell(state: state)
-                : OnboardingFlow(state: state),
-          ),
-        );
-      },
+    return ListenableBuilder(
+      listenable: Listenable.merge([state.themeMode, state.sessionStage]),
+      builder: (context, _) => MaterialApp.router(
+        debugShowCheckedModeBanner: false,
+        title: 'Muse',
+        theme: museLightTheme(),
+        darkTheme: museDarkTheme(),
+        themeMode: state.themeMode.value,
+        routerConfig: _router,
+      ),
     );
   }
 }
 
 class StartupLoader extends StatelessWidget {
-  @Preview()
   const StartupLoader({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: M3ECircularProgressIndicator()));
+    return const Center(child: M3ECircularProgressIndicator());
   }
 }
