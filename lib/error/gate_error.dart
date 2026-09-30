@@ -1,6 +1,8 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:openmetamuse/icons/muse.dart';
 
+import '../../widgets/muted_text.dart';
+
 class GateErrorScreen extends StatelessWidget {
   const GateErrorScreen({super.key});
 
@@ -22,10 +24,10 @@ class GateErrorScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 28),
-            Text(
+            MutedText(
               'Something went wrong.\nPlease try again.',
+              style: tt.bodyMedium!,
               textAlign: TextAlign.center,
-              style: tt.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
             ),
             const Spacer(flex: 4),
             Padding(

@@ -1,10 +1,10 @@
 import 'package:material_ui/material_ui.dart';
 
-import 'icons/muse.dart';
-import 'settings.dart';
-import 'state.dart';
+import '../../helpers.dart';
+import '../../icons/muse.dart';
+import '../../internal/state.dart';
+import '../../widgets/button.dart';
 
-// ponytail: static disclosure + one accept call; no webview for legal links.
 class TosScreen extends StatefulWidget {
   final AppState state;
   const TosScreen({super.key, required this.state});
@@ -13,9 +13,7 @@ class TosScreen extends StatefulWidget {
   State<TosScreen> createState() => _TosScreenState();
 }
 
-class _TosScreenState extends State<TosScreen> {
-  bool _busy = false;
-
+class _TosScreenState extends State<TosScreen> with RunAsync<TosScreen> {
   static const _rows = [
     (
       MuseIconAsset.shieldCheck,
@@ -34,16 +32,9 @@ class _TosScreenState extends State<TosScreen> {
     ),
   ];
 
-  Future<void> _continue() async {
-    setState(() => _busy = true);
-    try {
-      await widget.state.api.acceptTos();
-    } catch (_) {
-      // ponytail: best-effort server record; local acceptance still counts.
-    } finally {
-      widget.state.setTosAccepted(true);
-    }
-  }
+  Future<void> _continue() => runAsync(() async {
+    // TODO(backend): widget.state.api.acceptTos() + setTosAccepted(true).
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -112,26 +103,26 @@ class _TosScreenState extends State<TosScreen> {
                     text: TextSpan(
                       style: tt.labelSmall,
                       children: [
-                        TextSpan(
+                        const TextSpan(
                           text: 'By using this product, you agree to the ',
                         ),
                         TextSpan(
                           text: 'Muse Terms',
                           style: tt.labelSmall!.copyWith(color: cs.secondary),
                         ),
-                        TextSpan(
+                        const TextSpan(
                           text: ', which contains important information about your rights and responsibilities. Muse is subject to ',
                         ),
                         TextSpan(
                           text: "Meta's AI Terms",
                           style: tt.labelSmall!.copyWith(color: cs.secondary),
                         ),
-                        TextSpan(text: ' and the '),
+                        const TextSpan(text: ' and the '),
                         TextSpan(
                           text: 'Meta Privacy Policy',
                           style: tt.labelSmall!.copyWith(color: cs.secondary),
                         ),
-                        TextSpan(text: '.'),
+                        const TextSpan(text: '.'),
                       ],
                     ),
                   ),
@@ -139,46 +130,20 @@ class _TosScreenState extends State<TosScreen> {
                 const SizedBox(height: 12),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: SizedBox(
-                    height: 56,
-                    child: FilledButton(
-                      onPressed: _busy ? null : _continue,
-                      child: _busy
-                          ? SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: cs.onPrimary,
-                              ),
-                            )
-                          : Text('Continue', style: tt.labelLarge),
-                    ),
+                  child: MuseButton.primary(
+                    onPressed: _continue,
+                    busy: busyAsync,
+                    child: const Text('Continue'),
                   ),
                 ),
+                ...errorMessageAsync(),
                 const SizedBox(height: 16),
               ],
             ),
             Positioned(
               top: 8,
               right: 16,
-              child: InkWell(
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => SettingsScreen(state: widget.state),
-                  ),
-                ),
-                customBorder: const CircleBorder(),
-                child: Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: cs.outline, width: 1.5),
-                  ),
-                  child: Center(child: MuseIcon(MuseIconAsset.gear, size: 24)),
-                ),
-              ),
+              child: MuseGearButton.medium(onPressed: () {}),
             ),
           ],
         ),

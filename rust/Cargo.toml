@@ -1,0 +1,30 @@
+[package]
+name = "rust_lib_openmetamuse"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "staticlib"]
+
+[[bin]]
+name = "desktop"
+path = "src/bin/desktop/main.rs"
+
+[dependencies]
+anyhow = "1.0.104"
+flutter_rust_bridge = "=2.13.0"
+iroh = { version = "1.3.0", features = ["tls-ring"] }
+iroh-blobs = "0.103.0"
+iroh-tickets = "1.0.0"
+tokio = { version = "1.53.1", features = ["rt-multi-thread", "tokio-macros", "io-util", "signal", "time"] }
+n0-future = "0.3"
+
+
+[patch.crates-io]
+iroh = { git = "https://github.com/NoelJacob/iroh" }
+iroh-base = { git = "https://github.com/NoelJacob/iroh" }
+iroh-relay = { git = "https://github.com/NoelJacob/iroh" }
+iroh-dns = { git = "https://github.com/NoelJacob/iroh" }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }

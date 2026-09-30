@@ -6,9 +6,13 @@ import 'package:openmetamuse/theme.dart';
 import 'package:openmetamuse/widgets/logo.dart';
 
 import '../../widgets/button.dart';
+import '../../widgets/field.dart';
+import '../internal/state.dart';
 
 class Otp extends StatelessWidget {
-  const Otp({super.key});
+  final AppState state;
+
+  const Otp({super.key, required this.state});
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +56,7 @@ class Otp extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 28),
-                  const OtpForm(),
+                  OtpForm(state: state),
                 ],
               ),
             ),
@@ -69,7 +73,9 @@ class Otp extends StatelessWidget {
 }
 
 class OtpForm extends StatefulWidget {
-  const OtpForm({super.key});
+  final AppState state;
+
+  const OtpForm({super.key, required this.state});
 
   @override
   State<OtpForm> createState() => _OtpFormState();
@@ -83,13 +89,19 @@ class _OtpFormState extends State<OtpForm> with RunAsync<OtpForm> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _OtpBoxes(onChanged: (c) => setState(() => _code = c)),
+        OtpBoxes(onChanged: (c) => setState(() => _code = c)),
         const SizedBox(height: 28),
         MuseButton.primary(
+          // TODO: confirm otp
           onPressed: _code.length == 6
               ? () {
-                  // TODO: confirm otp
-                  context.push('');
+                  runAsync(() async {
+                    await widget.state.setUserId("random");
+                    await widget.state.setAccessToken("random");
+                    if (mounted) {
+                      context.push('/');
+                    }
+                  });
                 }
               : null,
           busy: busyAsync,
@@ -102,15 +114,16 @@ class _OtpFormState extends State<OtpForm> with RunAsync<OtpForm> {
 }
 
 /// Six filled cells, one hidden focus chain; no packages.
-class _OtpBoxes extends StatefulWidget {
+class OtpBoxes extends StatefulWidget {
   final ValueChanged<String> onChanged;
-  const _OtpBoxes({required this.onChanged});
+
+  const OtpBoxes({super.key, required this.onChanged});
 
   @override
-  State<_OtpBoxes> createState() => _OtpBoxesState();
+  State<OtpBoxes> createState() => _OtpBoxesState();
 }
 
-class _OtpBoxesState extends State<_OtpBoxes> {
+class _OtpBoxesState extends State<OtpBoxes> {
   final _nodes = List.generate(6, (_) => FocusNode());
   final _ctls = List.generate(6, (_) => TextEditingController());
 
@@ -153,7 +166,7 @@ class _OtpBoxesState extends State<_OtpBoxes> {
           Expanded(
             child: SizedBox(
               height: 62,
-              child: TextField(
+              child: MuseField(
                 controller: _ctls[i],
                 focusNode: _nodes[i],
                 autofocus: i == 0,
@@ -161,23 +174,7 @@ class _OtpBoxesState extends State<_OtpBoxes> {
                 keyboardType: TextInputType.number,
                 maxLength: 6,
                 style: Theme.of(context).textTheme.headlineMedium,
-                decoration: InputDecoration(
-                  counterText: '',
-                  filled: true,
-                  fillColor: Theme.of(context).colorScheme.surfaceContainerHigh,
-                  contentPadding: EdgeInsets.zero,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide.none,
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(
-                      color: Theme.of(context).colorScheme.primary,
-                      width: 2,
-                    ),
-                  ),
-                ),
+                contentPadding: EdgeInsets.zero,
                 onChanged: (v) => _changed(i, v),
               ),
             ),

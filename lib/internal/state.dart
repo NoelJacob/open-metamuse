@@ -24,6 +24,22 @@ class AppState {
   late final ValueNotifier<ThemeMode> themeMode;
   late final ValueNotifier<String?> userId;
   late final ValueNotifier<SessionStage> sessionStage;
+  // TODO(backend): loaders live here once the API port lands —
+  // bootstrap, loadThreads, loadThread, sendMessage, loadFeed, loadHub.
+  final threads = ValueNotifier<List<Map<String, dynamic>>>([]);
+  final currentThreadId = ValueNotifier<String?>(null);
+  final currentMessages = ValueNotifier<List<Map<String, dynamic>>>([]);
+  final feedUnits = ValueNotifier<List<Map<String, dynamic>>>([]);
+  final goals = ValueNotifier<List<String>>([]);
+
+  String get currentTitle {
+    final id = currentThreadId.value;
+    if (id == null) return 'New chat';
+    for (final t in threads.value) {
+      if (t['id'].toString() == id) return (t['title'] ?? 'Chat').toString();
+    }
+    return 'Chat';
+  }
 
   AppState({
     required this.api,
@@ -47,7 +63,7 @@ class AppState {
     );
     final String? userId = await secure.read(key: 'userId');
     final String? accessToken = await secure.read(key: 'accessToken');
-    SessionStage sessionStage = .welcome;
+    SessionStage sessionStage = SessionStage.welcome;
     if (accessToken != null) {
       sessionStage = SessionStage.loggedIn;
     }
@@ -64,27 +80,33 @@ class AppState {
     );
   }
 
-  void setThemeMode(ThemeMode mode) {
+  Future<void> setThemeMode(ThemeMode mode) async {
     if (themeMode.value == mode) return;
     themeMode.value = mode;
-    unawaited(prefs.setString("themeMode", mode.name));
+    await prefs.setString("themeMode", mode.name);
   }
 
-  void setUserId(String? id) {
+  Future<void> setUserId(String? id) async {
     if (userId.value == id) return;
     userId.value = id;
-    unawaited(secure.write(key: 'userId', value: id));
+    await secure.write(key: 'userId', value: id);
   }
 
-  void setSessionStage(SessionStage stage) {
-    if (sessionStage.value == stage) return;
-    sessionStage.value = stage;
-    unawaited(prefs.setString("sessionStage", stage.name));
+  Future<void> setAccessToken(String? token) async {
+    await secure.write(key: 'accessToken', value: token);
+    sessionStage.value = token == null
+        ? SessionStage.welcome
+        : SessionStage.loggedIn;
   }
 
   void dispose() {
     themeMode.dispose();
     sessionStage.dispose();
     userId.dispose();
+    threads.dispose();
+    currentThreadId.dispose();
+    currentMessages.dispose();
+    feedUnits.dispose();
+    goals.dispose();
   }
 }

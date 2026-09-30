@@ -1,9 +1,10 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-import 'state.dart';
+import '../../helpers.dart';
+import '../../internal/state.dart';
+import '../../widgets/dialog.dart';
 
-// ponytail: pill input + stub buttons; no recorder/uploader code.
 class ComposerBar extends StatefulWidget {
   final AppState state;
   const ComposerBar({super.key, required this.state});
@@ -14,9 +15,8 @@ class ComposerBar extends StatefulWidget {
 
 final replyTarget = ValueNotifier<String?>(null);
 
-class _ComposerBarState extends State<ComposerBar> {
+class _ComposerBarState extends State<ComposerBar> with RunAsync<ComposerBar> {
   final _ctl = TextEditingController();
-  bool _sending = false;
   String? _replyTo;
   final List<Map<String, dynamic>> _picked = [];
 
@@ -41,36 +41,13 @@ class _ComposerBarState extends State<ComposerBar> {
   Future<void> _send() async {
     final text = _ctl.text.trim();
     if (text.isEmpty) return;
-    setState(() => _sending = true);
-    try {
-      final target = _replyTo;
-      await widget.state.sendMessage(
-        target == null ? text : '[replying to $target] $text',
-        attachments: List<Map<String, dynamic>>.from(_picked),
-      );
-      _ctl.clear();
+    await runAsync(() async {
+      // TODO(backend): sendMessage(text, replyTo: _replyTo, picked).
       setState(() {
         _replyTo = null;
         _picked.clear();
       });
-    } catch (e) {
-      if (!mounted) return;
-      await showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: const Text('Send failed'),
-          content: Text(e.toString()),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
-    } finally {
-      if (mounted) setState(() => _sending = false);
-    }
+    });
   }
 
   @override
@@ -224,7 +201,7 @@ class _ComposerBarState extends State<ComposerBar> {
                     ),
                   ),
                   if (_ctl.text.trim().isNotEmpty)
-                    _sending
+                    busyAsync
                         ? const Padding(
                             padding: EdgeInsets.all(12),
                             child: SizedBox(
@@ -260,76 +237,25 @@ class _ComposerBarState extends State<ComposerBar> {
                             status.isDenied ||
                             status.isPermanentlyDenied ||
                             status.isRestricted;
-                        showDialog(
-                          context: context,
-                          builder: (_) => Dialog(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(28),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                24,
-                                28,
-                                24,
-                                20,
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  Text(
-                                    denied
-                                        ? 'Microphone access denied'
-                                        : 'Voice input',
-                                    textAlign: TextAlign.center,
-                                    style: tt.headlineSmall,
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    denied
-                                        ? 'Microphone access has been denied. Please enable it in Settings to use voice features.'
-                                        : 'Listening… speak now. Voice transcription has no offline fixture.',
-                                    textAlign: TextAlign.center,
-                                    style: tt.bodySmall?.copyWith(
-                                      color: cs.onSurfaceVariant,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 20),
-                                  if (denied)
-                                    SizedBox(
-                                      height: 52,
-                                      child: FilledButton(
-                                        onPressed: () async {
-                                          await openAppSettings();
-                                        },
-
-                                        child: Text(
-                                          'Open settings',
-                                          style: tt.labelLarge,
-                                        ),
-                                      ),
-                                    ),
-                                  if (denied) const SizedBox(height: 4),
-                                  SizedBox(
-                                    height: 48,
-                                    child: FilledButton.tonal(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: Text(
-                                        denied ? 'Cancel' : 'Close',
-                                        style: tt.labelLarge,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
+                        final ok = await showMuseDialog(
+                          context,
+                          title: denied
+                              ? 'Microphone access denied'
+                              : 'Voice input',
+                          body: denied
+                              ? 'Microphone access has been denied. Please enable it in Settings to use voice features.'
+                              : 'Listening… speak now. Voice transcription has no offline fixture.',
+                          verb: denied ? 'Open settings' : 'Close',
                         );
+                        if (ok && denied && context.mounted) {
+                          await openAppSettings();
+                        }
                       },
                     ),
                 ],
               ),
             ),
+            ...errorMessageAsync(),
           ],
         ),
       ),

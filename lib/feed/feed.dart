@@ -1,12 +1,9 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:share_plus/share_plus.dart';
 
-import 'icons/muse.dart';
-import 'settings.dart';
-import 'state.dart';
+import '../../icons/muse.dart';
+import '../../internal/state.dart';
 
-// ponytail: stock cards + two bottom sheets; units carry no URL offline so
-// the sheet offers Share only (no Copy-link row to invent).
 class FeedScreen extends StatelessWidget {
   final AppState state;
   const FeedScreen({super.key, required this.state});
@@ -64,24 +61,25 @@ class FeedScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: state,
-      builder: (context, _) => Scaffold(
-        appBar: AppBar(
-          title: const Text('Ideas'),
-          actions: [
-            IconButton(
-              tooltip: 'Settings',
-              icon: const MuseIcon(MuseIconAsset.settingsGear),
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => SettingsScreen(state: state)),
-              ),
-            ),
-          ],
-        ),
-        body: RefreshIndicator(
-          onRefresh: state.loadFeed,
-          child: state.feedUnits.isEmpty
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Ideas'),
+        actions: [
+          IconButton(
+            tooltip: 'Settings',
+            icon: const MuseIcon(MuseIconAsset.settingsGear),
+            onPressed: () {
+              // TODO(backend): push settings route once it exists.
+            },
+          ),
+        ],
+      ),
+      body: ListenableBuilder(
+        listenable: state.feedUnits,
+        builder: (context, _) => RefreshIndicator(
+          // TODO(backend): state.loadFeed
+          onRefresh: () async {},
+          child: state.feedUnits.value.isEmpty
               ? ListView(
                   children: const [
                     Padding(
@@ -92,9 +90,9 @@ class FeedScreen extends StatelessWidget {
                 )
               : ListView.builder(
                   padding: const EdgeInsets.all(12),
-                  itemCount: state.feedUnits.length,
+                  itemCount: state.feedUnits.value.length,
                   itemBuilder: (context, i) {
-                    final u = state.feedUnits[i];
+                    final u = state.feedUnits.value[i];
                     return Card(
                       child: ListTile(
                         title: Text((u['title'] ?? '').toString()),
