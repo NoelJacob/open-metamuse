@@ -28,7 +28,8 @@ async fn show(
             let ticket: BlobTicket = std::str::from_utf8(data)?.parse()?;
             let hash = ticket.hash();
             eprintln!("[recv] downloading {} from {}", hash, ticket.addr().id);
-            // ponytail: hold TempTag alive until export finishes or GC may collect it
+            // ponytail: pin across download+export or GC can collect between them
+            let _guard = blobs.store().tags().temp_tag(hash).await?;
             let downloader = blobs.store().downloader(ep);
             let progress = downloader.download(hash, [ticket.addr().id]);
             let mut stream = Box::pin(progress.stream().await?);
@@ -78,8 +79,11 @@ async fn send_loop(
     conn: &Connection,
     blobs: &iroh_blobs::BlobsProtocol,
     ep: &Endpoint,
-) -> Result<()> {
+) -> Result<usize> {
+    // ponytail: TempTags must outlive ticket use — drop = GC-able mid-download
+    let mut _live: Vec<iroh_blobs::api::TempTag> = Vec::new();
     let mut lines = BufReader::new(tokio::io::stdin()).lines();
+    let mut nblobs = 0;
     loop {
         print!("path or text> ");
         io::stdout().flush().expect("stdout");
@@ -108,7 +112,9 @@ async fn send_loop(
                 .await?;
             let ticket =
                 iroh_blobs::ticket::BlobTicket::new(ep.addr().clone(), tag.hash(), tag.format());
+            _live.push(tag);
             eprintln!("[send] sharing {} ({total} bytes)", p.display());
+            nblobs += 1;
             (b'b', ticket.to_string().into_bytes())
         } else {
             (b't', input.into_bytes())
@@ -118,6 +124,15 @@ async fn send_loop(
         send.write_all(&data).await?;
         send.finish()?;
     }
+    Ok(nblobs)
+}
+
+/// Receiver-side ack: one uni-stream with kind `a` after each blob export,
+/// so the dialer knows when it is safe to close. Text needs no ack.
+async fn ack(conn: &Connection) -> Result<()> {
+    let mut send = conn.open_uni().await?;
+    send.write_all(&[b'a']).await?;
+    send.finish()?;
     Ok(())
 }
 
@@ -126,14 +141,43 @@ async fn recv_loop(
     blobs: &iroh_blobs::BlobsProtocol,
     ep: &Endpoint,
 ) -> Result<()> {
+    recv_loop_inner(conn, blobs, ep, None).await
+}
+
+async fn recv_loop_acked(
+    conn: &Connection,
+    blobs: &iroh_blobs::BlobsProtocol,
+    ep: &Endpoint,
+    acks: tokio::sync::mpsc::Sender<()>,
+) -> Result<()> {
+    recv_loop_inner(conn, blobs, ep, Some(acks)).await
+}
+
+async fn recv_loop_inner(
+    conn: &Connection,
+    blobs: &iroh_blobs::BlobsProtocol,
+    ep: &Endpoint,
+    acks: Option<tokio::sync::mpsc::Sender<()>>,
+) -> Result<()> {
     loop {
         let mut recv = conn.accept_uni().await?;
         let mut kind = [0u8; 1];
         recv.read_exact(&mut kind).await?;
         let data = recv.read_to_end(MAX).await?;
+        if kind[0] == b'a' {
+            if let Some(tx) = &acks {
+                let _ = tx.send(()).await;
+            }
+            continue;
+        }
+        let was_blob = kind[0] == b'b';
         show(kind[0], &data, blobs, ep).await?;
+        if was_blob {
+            ack(conn).await?;
+        }
     }
 }
+
 
 /// Server side: receive only, per the docs transfer.rs pattern. Never reads
 /// stdin (headless under hub) and never closes — the dialer owns `close`.
@@ -146,21 +190,34 @@ async fn serve_chat(conn: Connection, blobs: iroh_blobs::BlobsProtocol, ep: Endp
 /// finish fetching blobs before we close and exit.
 async fn dial_chat(conn: Connection, blobs: iroh_blobs::BlobsProtocol, ep: Endpoint) -> Result<()> {
     println!("connected to {}", conn.remote_id());
+    let (tx, mut rx) = tokio::sync::mpsc::channel::<()>(32);
     let recv_task = tokio::spawn({
         let conn = conn.clone();
         let blobs = blobs.clone();
         let ep = ep.clone();
-        async move { recv_loop(&conn, &blobs, &ep).await }
+        async move { recv_loop_acked(&conn, &blobs, &ep, tx).await }
     });
     let send_res = send_loop(&conn, &blobs, &ep).await;
-    // ponytail: fixed 60s drain so the peer can fetch blobs before we exit
-    eprintln!("[send] stdin done; lingering 60s for peer blob fetch…");
-    tokio::time::sleep(std::time::Duration::from_secs(60)).await;
-    conn.close(0u32.into(), b"done");
-    match recv_task.await {
-        Ok(recv_res) => send_res.and(recv_res),
-        Err(e) => Err(anyhow::anyhow!("recv task failed: {e}")),
+    let nblobs = send_res.as_ref().unwrap_or(&0).clone();
+    if nblobs > 0 {
+        // ponytail: ack drain w/ 10s backstop — peer acks each blob export
+        eprintln!("[send] stdin done; waiting for {nblobs} blob ack(s)…");
+        let drained = tokio::time::timeout(std::time::Duration::from_secs(10), async {
+            for _ in 0..nblobs {
+                if rx.recv().await.is_none() {
+                    break;
+                }
+            }
+        })
+        .await;
+        if drained.is_err() {
+            eprintln!("[send] ack timeout; closing anyway");
+        }
     }
+    conn.close(0u32.into(), b"done");
+    // ponytail: our own close kills recv_loop — drop its result, keep send's
+    let _ = recv_task.await;
+    send_res.map(|_| ())
 }
 
 #[derive(Debug, Clone)]
@@ -185,7 +242,7 @@ async fn serve(ep: Endpoint) -> Result<()> {
     let dir = std::env::temp_dir().join(format!("metamuse-serve-{}", std::process::id()));
     std::fs::create_dir_all(&dir)?;
     let store = iroh_blobs::store::fs::FsStore::load(&dir).await?;
-    let blobs = iroh_blobs::BlobsProtocol::new(&store.into(), None);
+    let blobs = iroh_blobs::BlobsProtocol::new(&store, None);
     let router = iroh::protocol::Router::builder(ep.clone())
         .accept(iroh_blobs::ALPN, blobs.clone())
         .accept(
@@ -208,7 +265,7 @@ async fn dial(ep: Endpoint, ticket: &str) -> Result<()> {
     let dir = std::env::temp_dir().join(format!("metamuse-dial-{}", std::process::id()));
     std::fs::create_dir_all(&dir)?;
     let store = iroh_blobs::store::fs::FsStore::load(&dir).await?;
-    let blobs = iroh_blobs::BlobsProtocol::new(&store.into(), None);
+    let blobs = iroh_blobs::BlobsProtocol::new(&store, None);
     let _router = iroh::protocol::Router::builder(ep.clone())
         .accept(iroh_blobs::ALPN, blobs.clone())
         .spawn();
