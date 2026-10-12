@@ -2,7 +2,7 @@
 
 - **Language**: TypeScript
 - **Package Manager**: pnpm
-- **Add-ons**: prettier, eslint, tailwindcss, drizzle, better-auth, experimental, ai-tools
+- **Add-ons**: prettier, eslint, tailwindcss, enhanced-img, drizzle, better-auth, ai-tools, experimental
 
 ---
 

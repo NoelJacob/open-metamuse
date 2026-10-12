@@ -15,7 +15,21 @@ To recreate this project with the same configuration:
 
 ```sh
 # recreate this project
-pnpm dlx sv@0.17.1 create --template demo --types ts --add prettier eslint tailwindcss="plugins:none" drizzle="database:sqlite+sqlite:libsql" better-auth="demo:password,github" experimental="versions:kit+features:async,remoteFunctions,explicitEnvironmentVariables,handleRenderingErrors,forkPreloads" ai-tools="ide:claude-code,opencode,other+delivery:tools+tools:mcp,svelte-code-writer,svelte-core-bestpractices,svelte-file-editor+mcpSetup:remote" --install pnpm .
+pnpm dlx sv@1.0.0-next.8 create --template demo --types ts --add prettier eslint tailwindcss="plugins:none" enhanced-img drizzle="database:sqlite+sqlite:libsql" better-auth="demo:password,github" ai-tools="ide:claude-code,other,opencode+delivery:tools+tools:mcp,svelte-code-writer,svelte-core-bestpractices,svelte-file-editor+mcpSetup:remote" experimental="features:async,remoteFunctions,forkPreloads" --install pnpm sveltekit
+```
+
+## Adding features
+
+Add features to your project with `sv add`:
+
+```sh
+npx sv add
+```
+
+For example, to add Tailwind CSS:
+
+```sh
+npx sv add tailwindcss
 ```
 
 ## Developing

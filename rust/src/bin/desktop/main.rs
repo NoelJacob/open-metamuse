@@ -1,286 +1,230 @@
 use std::io::{self, Write};
-use std::path::PathBuf;
 
 use anyhow::Result;
-use iroh::endpoint::presets::N0;
-use iroh::endpoint::Connection;
-use iroh::Endpoint;
+use iroh::{endpoint::presets::N0, Endpoint};
 use iroh_tickets::endpoint::EndpointTicket;
-use n0_future::StreamExt;
-use tokio::io::{AsyncBufReadExt, BufReader};
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
-const ALPN: &[u8] = b"metamuse-poc/0";
-const MAX: usize = 10 << 20;
+const ALPN: &[u8] = b"metamuse-stream/0";
+// ponytail: 64KiB chunks — small enough to feel live, big enough to be efficient
+const CHUNK: usize = 64 << 10;
 
-fn normal_ticket(ep: &Endpoint) -> EndpointTicket {
-    EndpointTicket::new(ep.addr())
+// Frame on the wire: u16 meta-len | meta | u32 payload-len | payload.
+// Meta is a content tag: b"text", or b"bin:<filename>" for file chunks.
+async fn write_frame(
+    w: &mut (impl AsyncWriteExt + Unpin),
+    meta: &[u8],
+    payload: &[u8],
+) -> std::io::Result<()> {
+    w.write_u16(meta.len() as u16).await?;
+    w.write_all(meta).await?;
+    w.write_u32(payload.len() as u32).await?;
+    w.write_all(payload).await?;
+    Ok(())
 }
 
-async fn show(
-    kind: u8,
-    data: &[u8],
-    blobs: &iroh_blobs::BlobsProtocol,
-    ep: &Endpoint,
+async fn read_frame(r: &mut (impl AsyncReadExt + Unpin)) -> std::io::Result<(Vec<u8>, Vec<u8>)> {
+    let ml = r.read_u16().await? as usize;
+    let mut meta = vec![0u8; ml];
+    r.read_exact(&mut meta).await?;
+    let len = r.read_u32().await? as usize;
+    let mut payload = vec![0u8; len];
+    r.read_exact(&mut payload).await?;
+    Ok((meta, payload))
+}
+
+// Byte source -> peer. Same framed path for stdin text and file chunks:
+// text frames carry one typed line, file frames carry raw CHUNK bytes.
+async fn send_stream(
+    w: &mut (impl AsyncWriteExt + Unpin),
+    mut src: impl AsyncReadExt + Unpin,
+    meta: &str,
+    by_line: bool,
 ) -> Result<()> {
-    match kind {
-        b'b' => {
-            use iroh_blobs::ticket::BlobTicket;
-            let ticket: BlobTicket = std::str::from_utf8(data)?.parse()?;
-            let hash = ticket.hash();
-            eprintln!("[recv] downloading {} from {}", hash, ticket.addr().id);
-            // ponytail: pin across download+export or GC can collect between them
-            let _guard = blobs.store().tags().temp_tag(hash).await?;
-            let downloader = blobs.store().downloader(ep);
-            let progress = downloader.download(hash, [ticket.addr().id]);
-            let mut stream = Box::pin(progress.stream().await?);
-            while let Some(item) = stream.next().await {
-                use iroh_blobs::api::downloader::DownloadProgressItem;
-                match item {
-                    DownloadProgressItem::Progress(n) => {
-                        eprintln!("[recv] {n} bytes");
+    if by_line {
+        let mut buf = Vec::new();
+        loop {
+            buf.clear();
+            let mut byte = [0u8; 1];
+            loop {
+                let n = src.read(&mut byte).await?;
+                if n == 0 {
+                    if !buf.is_empty() {
+                        write_frame(w, meta.as_bytes(), &buf).await?;
                     }
-                    DownloadProgressItem::TryProvider { id, .. } => {
-                        eprintln!("[recv] trying provider {id}");
-                    }
-                    DownloadProgressItem::ProviderFailed { id, .. } => {
-                        eprintln!("[recv] provider failed: {id}");
-                    }
-                    DownloadProgressItem::PartComplete { .. } => {
-                        eprintln!("[recv] part complete");
-                    }
-                    DownloadProgressItem::Error(e) => {
-                        anyhow::bail!("download error: {e:#}");
-                    }
-                    DownloadProgressItem::DownloadError => {
-                        anyhow::bail!("download failed");
-                    }
+                    w.shutdown().await?;
+                    return Ok(());
                 }
-            }
-            eprintln!("[recv] downloaded {hash}, exporting…");
-            let out = std::env::temp_dir().join(format!("rx_{hash}.bin"));
-            blobs.store().blobs().export(hash, &out).await?;
-            println!("got blob -> {}", out.display());
-        }
-        b'f' => {
-            let name: String = data.iter().take(4).map(|b| format!("{b:02x}")).collect();
-            let p = std::env::temp_dir().join(format!("rx_{name}.bin"));
-            std::fs::write(&p, data).expect("write file");
-            println!("got image -> {}", p.display());
-        }
-        _ => println!("got text: {}", String::from_utf8_lossy(data)),
-    }
-    Ok(())
-}
-
-/// Reads stdin lines and sends each as one message. EOF (Ctrl-D) ends it.
-/// A file path is imported into the blob store and announced as a
-/// `BlobTicket` (kind `b`); anything else goes as plain text (kind `t`).
-async fn send_loop(
-    conn: &Connection,
-    blobs: &iroh_blobs::BlobsProtocol,
-    ep: &Endpoint,
-) -> Result<usize> {
-    // ponytail: TempTags must outlive ticket use — drop = GC-able mid-download
-    let mut _live: Vec<iroh_blobs::api::TempTag> = Vec::new();
-    let mut lines = BufReader::new(tokio::io::stdin()).lines();
-    let mut nblobs = 0;
-    loop {
-        print!("path or text> ");
-        io::stdout().flush().expect("stdout");
-        let Some(line) = lines.next_line().await? else {
-            break;
-        };
-        let input = line.trim().to_owned();
-        if input.is_empty() {
-            continue;
-        }
-        let p = PathBuf::from(&input);
-        let (kind, data) = if p.is_file() {
-            use iroh_blobs::api::blobs::{AddPathOptions, ImportMode};
-            let abs = std::path::absolute(&p)?;
-            let total = std::fs::metadata(&abs)?.len();
-            eprintln!("[send] hashing {} ({total} bytes)…", p.display());
-            let tag = blobs
-                .store()
-                .blobs()
-                .add_path_with_opts(AddPathOptions {
-                    path: abs,
-                    mode: ImportMode::TryReference,
-                    format: iroh_blobs::BlobFormat::Raw,
-                })
-                .temp_tag()
-                .await?;
-            let ticket =
-                iroh_blobs::ticket::BlobTicket::new(ep.addr().clone(), tag.hash(), tag.format());
-            _live.push(tag);
-            eprintln!("[send] sharing {} ({total} bytes)", p.display());
-            nblobs += 1;
-            (b'b', ticket.to_string().into_bytes())
-        } else {
-            (b't', input.into_bytes())
-        };
-        let mut send = conn.open_uni().await?;
-        send.write_all(&[kind]).await?;
-        send.write_all(&data).await?;
-        send.finish()?;
-    }
-    Ok(nblobs)
-}
-
-/// Receiver-side ack: one uni-stream with kind `a` after each blob export,
-/// so the dialer knows when it is safe to close. Text needs no ack.
-async fn ack(conn: &Connection) -> Result<()> {
-    let mut send = conn.open_uni().await?;
-    send.write_all(&[b'a']).await?;
-    send.finish()?;
-    Ok(())
-}
-
-async fn recv_loop(
-    conn: &Connection,
-    blobs: &iroh_blobs::BlobsProtocol,
-    ep: &Endpoint,
-) -> Result<()> {
-    recv_loop_inner(conn, blobs, ep, None).await
-}
-
-async fn recv_loop_acked(
-    conn: &Connection,
-    blobs: &iroh_blobs::BlobsProtocol,
-    ep: &Endpoint,
-    acks: tokio::sync::mpsc::Sender<()>,
-) -> Result<()> {
-    recv_loop_inner(conn, blobs, ep, Some(acks)).await
-}
-
-async fn recv_loop_inner(
-    conn: &Connection,
-    blobs: &iroh_blobs::BlobsProtocol,
-    ep: &Endpoint,
-    acks: Option<tokio::sync::mpsc::Sender<()>>,
-) -> Result<()> {
-    loop {
-        let mut recv = conn.accept_uni().await?;
-        let mut kind = [0u8; 1];
-        recv.read_exact(&mut kind).await?;
-        let data = recv.read_to_end(MAX).await?;
-        if kind[0] == b'a' {
-            if let Some(tx) = &acks {
-                let _ = tx.send(()).await;
-            }
-            continue;
-        }
-        let was_blob = kind[0] == b'b';
-        show(kind[0], &data, blobs, ep).await?;
-        if was_blob {
-            ack(conn).await?;
-        }
-    }
-}
-
-
-/// Server side: receive only, per the docs transfer.rs pattern. Never reads
-/// stdin (headless under hub) and never closes — the dialer owns `close`.
-async fn serve_chat(conn: Connection, blobs: iroh_blobs::BlobsProtocol, ep: Endpoint) -> Result<()> {
-    println!("connected to {}", conn.remote_id());
-    recv_loop(&conn, &blobs, &ep).await
-}
-
-/// Dial side: duplex send/recv. After stdin EOF, lingers so the peer can
-/// finish fetching blobs before we close and exit.
-async fn dial_chat(conn: Connection, blobs: iroh_blobs::BlobsProtocol, ep: Endpoint) -> Result<()> {
-    println!("connected to {}", conn.remote_id());
-    let (tx, mut rx) = tokio::sync::mpsc::channel::<()>(32);
-    let recv_task = tokio::spawn({
-        let conn = conn.clone();
-        let blobs = blobs.clone();
-        let ep = ep.clone();
-        async move { recv_loop_acked(&conn, &blobs, &ep, tx).await }
-    });
-    let send_res = send_loop(&conn, &blobs, &ep).await;
-    let nblobs = send_res.as_ref().unwrap_or(&0).clone();
-    if nblobs > 0 {
-        // ponytail: ack drain w/ 10s backstop — peer acks each blob export
-        eprintln!("[send] stdin done; waiting for {nblobs} blob ack(s)…");
-        let drained = tokio::time::timeout(std::time::Duration::from_secs(10), async {
-            for _ in 0..nblobs {
-                if rx.recv().await.is_none() {
+                if byte[0] == b'\n' {
                     break;
                 }
+                buf.push(byte[0]);
             }
-        })
-        .await;
-        if drained.is_err() {
-            eprintln!("[send] ack timeout; closing anyway");
+            if !buf.is_empty() {
+                write_frame(w, meta.as_bytes(), &buf).await?;
+            }
         }
     }
-    conn.close(0u32.into(), b"done");
-    // ponytail: our own close kills recv_loop — drop its result, keep send's
-    let _ = recv_task.await;
-    send_res.map(|_| ())
+    let mut chunk = vec![0u8; CHUNK];
+    loop {
+        let n = src.read(&mut chunk).await?;
+        if n == 0 {
+            break;
+        }
+        write_frame(w, meta.as_bytes(), &chunk[..n]).await?;
+    }
+    w.shutdown().await?;
+    Ok(())
+}
+// Peer frames -> stdout for text, appended to one file per bin:<name> stream.
+async fn recv_loop(r: &mut (impl AsyncReadExt + Unpin)) -> Result<()> {
+    use tokio::io::AsyncWriteExt;
+    let mut out: Option<(tokio::fs::File, String, u64)> = None;
+    loop {
+        match read_frame(r).await {
+            Ok((meta, payload)) => {
+                let meta = String::from_utf8_lossy(&meta).into_owned();
+                if meta == "text" {
+                    println!("[text] {}", String::from_utf8_lossy(&payload));
+                } else {
+                    let raw = meta.strip_prefix("bin:").unwrap_or("stream");
+                    // ponytail: strip peer-supplied path — never write outside /tmp
+                    let name: String = std::path::Path::new(raw).file_name().map(|s| s.to_string_lossy().into_owned()).unwrap_or_else(|| "stream".into());
+                    // ponytail: one file per stream name, append chunks in order
+                    let fresh = !matches!(&out, Some((_, n, _)) if n == &name);
+                    if fresh {
+                        if let Some((_, n, total)) = out.take() {
+                            println!("[bin:{n}] done, {total} bytes");
+                        }
+                        let p = std::env::temp_dir().join(format!("rx_{name}.bin"));
+                        let _ = tokio::fs::remove_file(&p).await;
+                        let f = tokio::fs::OpenOptions::new()
+                            .create(true)
+                            .append(true)
+                            .open(&p)
+                            .await?;
+                        println!("[bin:{name}] -> {}", p.display());
+                        out = Some((f, name.to_owned(), 0));
+                    }
+                    if let Some((f, _, total)) = out.as_mut() {
+                        f.write_all(&payload).await?;
+                        *total += payload.len() as u64;
+                    }
+                }
+            }
+            Err(e) if e.kind() == std::io::ErrorKind::UnexpectedEof => {
+                if let Some((_, n, total)) = out {
+                    println!("[bin:{n}] done, {total} bytes");
+                }
+                return Ok(());
+            }
+            Err(e) => return Err(e.into()),
+        }
+    }
+}
+
+// Both sides identical once the bi stream exists: send our source, print peer's.
+// Peer going away mid-chat is a clean end; exit follows our own send path.
+async fn chat(
+    mut send: impl AsyncWriteExt + Unpin,
+    mut recv: impl AsyncReadExt + Unpin,
+    src: impl AsyncReadExt + Unpin,
+    meta: String,
+    by_line: bool,
+) -> Result<()> {
+    let (send_res, recv_res) =
+        tokio::join!(send_stream(&mut send, src, &meta, by_line), recv_loop(&mut recv));
+    if let Err(e) = &recv_res {
+        eprintln!("[peer] {e:#}");
+    }
+    send_res
 }
 
 #[derive(Debug, Clone)]
 struct ChatProto {
-    blobs: iroh_blobs::BlobsProtocol,
-    ep: Endpoint,
+    file: Option<String>,
 }
 impl iroh::protocol::ProtocolHandler for ChatProto {
     async fn accept(
         &self,
         conn: iroh::endpoint::Connection,
     ) -> Result<(), iroh::protocol::AcceptError> {
-        serve_chat(conn, self.blobs.clone(), self.ep.clone())
+        println!("connected to {}", conn.remote_id());
+        let (send, recv) = conn
+            .accept_bi()
             .await
-            .map_err(|e| {
+            .map_err(|e| iroh::protocol::AcceptError::from_err(std::io::Error::other(e)))?;
+        // Serve side mirrors the dialer's mode: file arg serves chunks, else stdin text.
+        if let Some(path) = &self.file {
+            let f = tokio::fs::File::open(path).await.map_err(|e| {
+                iroh::protocol::AcceptError::from_err(std::io::Error::other(e))
+            })?;
+            let meta = format!("bin:{}", std::path::Path::new(path).file_name().map(|s| s.to_string_lossy().into_owned()).unwrap_or_else(|| path.clone()));
+            chat(send, recv, f, meta, false).await.map_err(|e| {
                 iroh::protocol::AcceptError::from_err(std::io::Error::other(format!("{e:#}")))
             })
+        } else {
+            chat(send, recv, tokio::io::stdin(), "text".into(), true)
+                .await
+                .map_err(|e| {
+                    iroh::protocol::AcceptError::from_err(std::io::Error::other(format!("{e:#}")))
+                })
+        }
     }
 }
 
-async fn serve(ep: Endpoint) -> Result<()> {
-    let dir = std::env::temp_dir().join(format!("metamuse-serve-{}", std::process::id()));
-    std::fs::create_dir_all(&dir)?;
-    let store = iroh_blobs::store::fs::FsStore::load(&dir).await?;
-    let blobs = iroh_blobs::BlobsProtocol::new(&store, None);
+async fn serve(ep: Endpoint, file: Option<String>) -> Result<()> {
     let router = iroh::protocol::Router::builder(ep.clone())
-        .accept(iroh_blobs::ALPN, blobs.clone())
-        .accept(
-            ALPN,
-            ChatProto {
-                blobs,
-                ep: ep.clone(),
-            },
-        )
+        .accept(ALPN, ChatProto { file })
         .spawn();
-    let ticket = normal_ticket(&ep);
-    println!("ticket: {ticket}");
+    println!("ticket: {}", EndpointTicket::new(ep.addr()));
     tokio::signal::ctrl_c().await?;
     router.shutdown().await?;
     Ok(())
 }
 
-async fn dial(ep: Endpoint, ticket: &str) -> Result<()> {
+async fn dial(ep: Endpoint, ticket: &str, file: Option<String>) -> Result<()> {
     let addr = ticket.parse::<EndpointTicket>()?.endpoint_addr().clone();
-    let dir = std::env::temp_dir().join(format!("metamuse-dial-{}", std::process::id()));
-    std::fs::create_dir_all(&dir)?;
-    let store = iroh_blobs::store::fs::FsStore::load(&dir).await?;
-    let blobs = iroh_blobs::BlobsProtocol::new(&store, None);
-    let _router = iroh::protocol::Router::builder(ep.clone())
-        .accept(iroh_blobs::ALPN, blobs.clone())
-        .spawn();
     let conn = ep.connect(addr, ALPN).await?;
-    dial_chat(conn, blobs, ep).await
+    println!("connected to {}", conn.remote_id());
+    let (send, recv) = conn.open_bi().await?;
+    if let Some(path) = file {
+        let f = tokio::fs::File::open(&path).await?;
+        let name = std::path::Path::new(&path)
+            .file_name()
+            .map(|s| s.to_string_lossy().into_owned())
+            .unwrap_or(path);
+        chat(send, recv, f, format!("bin:{name}"), false).await
+    } else {
+        chat(send, recv, tokio::io::stdin(), "text".into(), true).await
+    }
 }
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let args: Vec<String> = std::env::args().collect();
-    let ep = Endpoint::builder(N0).bind().await?;
-    if args.len() == 3 && args[1] == "--connect" {
-        dial(ep, &args[2]).await?;
-    } else {
-        serve(ep).await?;
+    // Usage: desktop [--file PATH] | desktop --connect TICKET [--file PATH]
+    let mut file: Option<String> = None;
+    let mut ticket: Option<String> = None;
+    let mut it = std::env::args().skip(1).peekable();
+    while let Some(a) = it.next() {
+        match a.as_str() {
+            "--file" => file = it.next(),
+            "--connect" => ticket = it.next(),
+            _ => {
+                eprintln!("usage: desktop [--file PATH] | desktop --connect TICKET [--file PATH]");
+                std::process::exit(2);
+            }
+        }
     }
-    Ok(())
+    // ponytail: keep stdin prompt on tty only — pipes stay clean for tests
+    if file.is_none() && std::io::IsTerminal::is_terminal(&std::io::stdin()) {
+        print!("> ");
+        io::stdout().flush().expect("stdout");
+    }
+    let ep = Endpoint::builder(N0).bind().await?;
+    if let Some(t) = ticket {
+        dial(ep, &t, file).await
+    } else {
+        serve(ep, file).await
+    }
 }
